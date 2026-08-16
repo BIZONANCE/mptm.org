@@ -429,11 +429,41 @@ export default function Form() {
             const result = await response.json();
 
             if (result.success) {
-                setSubmitted(true);
-                setSubmitSuccessMsg(result.message || "✅ सदस्य नोंदणी Neon PostgreSQL डेटाबेसमध्ये यशस्वीरित्या जतन केली गेली!");
-                fetchNextNumbers();
+                setSubmitSuccessMsg("✅ सदस्य नोंदणी यशस्वीरित्या जतन झाली!");
+                
+                // Open browser print dialog for receipt
+                window.print();
+
+                // Auto-refresh form fields for the next submission after printing
+                setTimeout(async () => {
+                    setFormData({
+                        receiptNo: "MPTM001",
+                        date: new Date().toISOString().split("T")[0],
+                        registrationFee: "101",
+                        address: "",
+                        amountInWords: "एकशे एक रुपये फक्त",
+                        paymentMethod: "रोख",
+                        otherPaymentMethod: "",
+                    });
+                    setMainMembers([
+                        {
+                            srNo: 1,
+                            memberNo: "AVA001",
+                            fullName: "",
+                            mobileNo: "",
+                            prabhagNo: "",
+                        },
+                    ]);
+                    setFamilyMembers([]);
+                    setPaymentScreenshot(null);
+                    setScreenshotPreview(null);
+                    setCashPaidStatus("");
+                    setSubmitSuccessMsg("");
+                    setSubmitErrorMsg("");
+                    await fetchNextNumbers();
+                }, 1000);
             } else {
-                setSubmitErrorMsg(result.error || "❌ डेटाबेसमध्ये जतन करताना त्रुटी आली.");
+                setSubmitErrorMsg(result.error || "❌ डेटाबेसमध्ये जतन करताना त्रुटी आली. हा मोबाईल क्रमांक किंवा माहिती आधीच नोंदणीकृत असण्याची शक्यता आहे.");
             }
         } catch (err: unknown) {
             console.error("Submission error:", err);
@@ -441,11 +471,6 @@ export default function Form() {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const handlePrint = () => {
-        if (!validateFullForm()) return;
-        window.print();
     };
 
     // Shared input styling: text-base on mobile prevents iOS auto-zoom-on-focus,
@@ -1136,7 +1161,7 @@ export default function Form() {
                                             </p>
                                         </div>
 
-                                        {/* Submitted Alert Message & Database Error Feedback */}
+                                        {/* Submitted Alert Message & Database Feedback */}
                                         {submitSuccessMsg && (
                                             <div className="p-3.5 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-emerald-950 font-bold text-center text-xs sm:text-sm print:hidden shadow-sm">
                                                 {submitSuccessMsg}
@@ -1149,35 +1174,24 @@ export default function Form() {
                                             </div>
                                         )}
 
-                                        {/* Action Buttons — stack full-width on mobile, sit side by side from sm: up */}
-                                        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-2 print:hidden">
+                                        {/* Action Button — Single Combined Submit & Print Button */}
+                                        <div className="flex items-center justify-center pt-2 print:hidden">
                                             <button
                                                 type="submit"
                                                 disabled={submitting || (formData.paymentMethod === "UPI" && !paymentScreenshot)}
-                                                className={`min-h-[48px] w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-full font-bold text-white shadow-lg transition-all transform active:scale-[0.98] sm:hover:-translate-y-0.5 text-sm sm:text-base ${submitting || (formData.paymentMethod === "UPI" && !paymentScreenshot)
+                                                className={`min-h-[50px] w-full sm:w-auto px-8 py-3.5 rounded-full font-extrabold text-white shadow-xl transition-all transform active:scale-[0.98] sm:hover:-translate-y-0.5 text-base sm:text-lg flex items-center justify-center gap-2 ${submitting || (formData.paymentMethod === "UPI" && !paymentScreenshot)
                                                     ? "bg-stone-400 cursor-not-allowed opacity-80"
-                                                    : "bg-gradient-to-r from-[#4A0404] via-[#7A0C0C] to-[#4A0404] hover:brightness-110 hover:shadow-red-900/30"
+                                                    : "bg-gradient-to-r from-[#4A0404] via-[#7A0C0C] to-[#4A0404] hover:brightness-110 hover:shadow-red-900/40 border border-amber-500/40"
                                                     }`}
                                             >
-                                                {submitting ? "⏳ डेटाबेसमध्ये जतन होत आहे..." : "नोंदणी पूर्ण करा ✍️"}
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={handlePrint}
-                                                disabled={formData.paymentMethod === "UPI" && !paymentScreenshot}
-                                                title={
-                                                    formData.paymentMethod === "UPI" && !paymentScreenshot
-                                                        ? "पावती जनरेट / प्रिंट करण्यासाठी आधी ट्रान्सअॅक्शन स्क्रीनशॉट अपलोड करा"
-                                                        : "पावती प्रिंट करा"
-                                                }
-                                                className={`min-h-[48px] w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-full font-bold text-amber-950 border shadow-md transition-all transform active:scale-[0.98] sm:hover:-translate-y-0.5 text-sm sm:text-base flex items-center justify-center gap-2 ${formData.paymentMethod === "UPI" && !paymentScreenshot
-                                                    ? "bg-stone-200 border-stone-300 text-stone-500 cursor-not-allowed opacity-70"
-                                                    : "bg-amber-200 border-amber-500 hover:bg-amber-300"
-                                                    }`}
-                                            >
-                                                <span>पावती प्रिंट / डाउनलोड करा</span>
-                                                <span>🖨️</span>
+                                                {submitting ? (
+                                                    <span>⏳ जतन होत आहे...</span>
+                                                ) : (
+                                                    <>
+                                                        <span>अर्ज सबमिट करा व पावती प्रिंट काढा</span>
+                                                        <span>🖨️</span>
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </div>
