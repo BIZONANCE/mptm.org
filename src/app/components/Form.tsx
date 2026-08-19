@@ -103,18 +103,36 @@ function convertNumberToMarathiWords(amountStr: string): string {
     return words.trim() + " रुपये फक्त";
 }
 
+function getFormYear(dateStr?: string): number {
+    if (dateStr) {
+        const year = new Date(dateStr).getFullYear();
+        if (!isNaN(year) && year > 1900) return year;
+    }
+    return new Date().getFullYear();
+}
+
+function formatReceiptNo(seq: number, dateStr?: string): string {
+    const year = getFormYear(dateStr);
+    return `MPTM-${year}-AMT-R${String(seq).padStart(3, "0")}`;
+}
+
+function formatMemberNo(srNo: number, baseSeq: number = 1, dateStr?: string): string {
+    const year = getFormYear(dateStr);
+    return `MPTM-${year}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+}
+
 export default function Form() {
     const DEFAULT_BASE_FEE = 101;
     const FULL_SANDESH_MESSAGE = "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या प्राथमिक सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली.";
 
     const [baseMemberSeq, setBaseMemberSeq] = useState(1);
+    const [receiptSeq, setReceiptSeq] = useState(1);
 
-    const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq) =>
-        `AVA${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+    const initialDate = new Date().toISOString().split("T")[0];
 
     // Main Members list (Default 1 Main Member)
     const [mainMembers, setMainMembers] = useState<MainMember[]>([
-        { srNo: 1, memberNo: "AVA001", fullName: "", mobileNo: "", prabhagNo: "" },
+        { srNo: 1, memberNo: formatMemberNo(1, 1, initialDate), fullName: "", mobileNo: "", prabhagNo: "" },
     ]);
 
     // Family Members table (Initial 3 rows default)
@@ -127,8 +145,8 @@ export default function Form() {
     const initialFee = DEFAULT_BASE_FEE * 1; // ₹101 by default
 
     const [formData, setFormData] = useState({
-        receiptNo: "MPTM001",
-        date: new Date().toISOString().split("T")[0],
+        receiptNo: formatReceiptNo(1, initialDate),
+        date: initialDate,
         registrationFee: initialFee.toString(),
         address: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
@@ -169,6 +187,9 @@ export default function Form() {
             const data = await res.json();
 
             if (data.success) {
+                if (data.nextReceiptSeq) {
+                    setReceiptSeq(data.nextReceiptSeq);
+                }
                 if (data.receiptNo) {
                     setFormData((prev) => ({ ...prev, receiptNo: data.receiptNo }));
                 }
@@ -178,7 +199,7 @@ export default function Form() {
                     setMainMembers((prev) =>
                         prev.map((m, idx) => ({
                             ...m,
-                            memberNo: `AVA${String(startSeq + idx).padStart(3, "0")}`,
+                            memberNo: formatMemberNo(idx + 1, startSeq, formData.date),
                         }))
                     );
                 }
@@ -244,6 +265,19 @@ export default function Form() {
                 registrationFee: value,
                 amountInWords: convertNumberToMarathiWords(value),
             }));
+        } else if (name === "date") {
+            const newDate = value;
+            setFormData((prev) => ({
+                ...prev,
+                date: newDate,
+                receiptNo: formatReceiptNo(receiptSeq, newDate),
+            }));
+            setMainMembers((prev) =>
+                prev.map((m, idx) => ({
+                    ...m,
+                    memberNo: formatMemberNo(idx + 1, baseMemberSeq, newDate),
+                }))
+            );
         } else {
             setFormData((prev) => ({ ...prev, [name]: value }));
         }
@@ -277,7 +311,7 @@ export default function Form() {
                 ...prev,
                 {
                     srNo: newCount,
-                    memberNo: formatMemberNo(newCount, baseMemberSeq),
+                    memberNo: formatMemberNo(newCount, baseMemberSeq, formData.date),
                     fullName: "",
                     mobileNo: "",
                     prabhagNo: "",
@@ -295,7 +329,7 @@ export default function Form() {
             const reindexed = updated.map((m, idx) => ({
                 ...m,
                 srNo: idx + 1,
-                memberNo: formatMemberNo(idx + 1, baseMemberSeq),
+                memberNo: formatMemberNo(idx + 1, baseMemberSeq, formData.date),
             }));
 
             const newCount = reindexed.length;
@@ -444,9 +478,10 @@ export default function Form() {
 
                 // Auto-refresh form fields for the next submission after printing
                 setTimeout(async () => {
+                    const resetDate = new Date().toISOString().split("T")[0];
                     setFormData({
-                        receiptNo: "MPTM001",
-                        date: new Date().toISOString().split("T")[0],
+                        receiptNo: formatReceiptNo(1, resetDate),
+                        date: resetDate,
                         registrationFee: "101",
                         address: "",
                         amountInWords: "एकशे एक रुपये फक्त",
@@ -456,7 +491,7 @@ export default function Form() {
                     setMainMembers([
                         {
                             srNo: 1,
-                            memberNo: "AVA001",
+                            memberNo: formatMemberNo(1, 1, resetDate),
                             fullName: "",
                             mobileNo: "",
                             prabhagNo: "",
