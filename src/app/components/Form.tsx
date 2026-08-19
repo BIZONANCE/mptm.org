@@ -132,7 +132,7 @@ export default function Form() {
         registrationFee: initialFee.toString(),
         address: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
-        paymentMethod: "रोख",
+        paymentMethod: "UPI", // Cash ("रोख") disabled, defaulted to UPI
         otherPaymentMethod: "",
     });
 
@@ -141,7 +141,6 @@ export default function Form() {
     const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
     const [screenshotError, setScreenshotError] = useState<string>("");
     const [typedMessage, setTypedMessage] = useState<string>("");
-    const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [submitSuccessMsg, setSubmitSuccessMsg] = useState("");
     const [submitErrorMsg, setSubmitErrorMsg] = useState("");
@@ -150,11 +149,23 @@ export default function Form() {
         (formData.paymentMethod === "रोख" && cashPaidStatus === "yes") ||
         (formData.paymentMethod === "UPI" && Boolean(paymentScreenshot));
 
-    // Fetch unique next receipt and member numbers from Backend API
+    // Fetch unique next receipt and member numbers safely from Backend API
     const fetchNextNumbers = async () => {
         try {
             const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
             const res = await fetch(`${backendUrl}/api/next-numbers`);
+
+            if (!res.ok) {
+                console.warn(`Backend sequence API returned status ${res.status}`);
+                return;
+            }
+
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                console.warn("Backend sequence API did not return JSON.");
+                return;
+            }
+
             const data = await res.json();
 
             if (data.success) {
@@ -201,7 +212,6 @@ export default function Form() {
         }
     }, [isPaymentVerified, paymentScreenshot, formData.paymentMethod]);
 
-    // Dynamic fee calculation rate helper
     const getRatePerMember = (currentFeeStr: string, memberCount: number) => {
         const currentNum = parseInt(currentFeeStr, 10);
         if (!isNaN(currentNum) && currentNum > 0 && memberCount > 0) {
@@ -239,7 +249,6 @@ export default function Form() {
         }
     };
 
-    // Main Member field changes
     const handleMainMemberChange = (
         index: number,
         field: keyof MainMember,
@@ -252,7 +261,6 @@ export default function Form() {
         });
     };
 
-    // Add a Main Member
     const addMainMember = () => {
         setMainMembers((prev) => {
             const currentRate = getRatePerMember(formData.registrationFee, prev.length);
@@ -278,10 +286,9 @@ export default function Form() {
         });
     };
 
-    // Delete a Main Member
     const deleteMainMember = (indexToDelete: number) => {
         setMainMembers((prev) => {
-            if (prev.length <= 1) return prev; // Keep at least 1 main member
+            if (prev.length <= 1) return prev;
 
             const currentRate = getRatePerMember(formData.registrationFee, prev.length);
             const updated = prev.filter((_, idx) => idx !== indexToDelete);
@@ -304,7 +311,6 @@ export default function Form() {
         });
     };
 
-    // Family member field changes
     const handleFamilyMemberChange = (
         index: number,
         field: keyof FamilyMember,
@@ -341,7 +347,6 @@ export default function Form() {
     const validateFullForm = () => {
         const FILL_FORM_FIRST_MSG = "⚠️ कृपया आधी संपूर्ण फॉर्म भरा!";
 
-        // 1. Basic Top Fields
         if (!formData.receiptNo || formData.receiptNo.trim() === "") {
             setScreenshotError(FILL_FORM_FIRST_MSG);
             return false;
@@ -362,7 +367,6 @@ export default function Form() {
             return false;
         }
 
-        // 2. Main Members Validation
         for (let i = 0; i < mainMembers.length; i++) {
             const m = mainMembers[i];
             if (!m.fullName || m.fullName.trim() === "" || !m.mobileNo || m.mobileNo.length !== 10 || !m.prabhagNo || m.prabhagNo.trim() === "") {
@@ -371,7 +375,6 @@ export default function Form() {
             }
         }
 
-        // 3. Family Members Validation
         for (let i = 0; i < familyMembers.length; i++) {
             const fm = familyMembers[i];
             const hasAnyData = fm.name.trim() !== "" || fm.relation.trim() !== "" || fm.dob.trim() !== "" || fm.occupation.trim() !== "" || fm.mobile.trim() !== "";
@@ -388,7 +391,6 @@ export default function Form() {
             }
         }
 
-        // 4. Payment Method & Verification
         if (formData.paymentMethod === "रोख" && cashPaidStatus !== "yes") {
             setScreenshotError("⚠️ कृपया रोख रक्कम भरली गेली असल्याची (होय) निवड करा!");
             return false;
@@ -426,6 +428,12 @@ export default function Form() {
                 }),
             });
 
+            // Safeguard against HTML 404 / 500 error pages
+            const contentType = response.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new Error("सर्व्हरने अयोग्य प्रतिसाद (HTML) दिला. कृपया बॅकएंड सर्व्हर port 5000 वर सुरू असल्याची खात्री करा.");
+            }
+
             const result = await response.json();
 
             if (result.success) {
@@ -442,7 +450,7 @@ export default function Form() {
                         registrationFee: "101",
                         address: "",
                         amountInWords: "एकशे एक रुपये फक्त",
-                        paymentMethod: "रोख",
+                        paymentMethod: "UPI",
                         otherPaymentMethod: "",
                     });
                     setMainMembers([
@@ -467,16 +475,13 @@ export default function Form() {
             }
         } catch (err: unknown) {
             console.error("Submission error:", err);
-            setSubmitErrorMsg("❌ सर्व्हरशी संपर्क साधताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
+            const errorMessage = err instanceof Error ? err.message : "❌ सर्व्हरशी संपर्क साधताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.";
+            setSubmitErrorMsg(errorMessage);
         } finally {
             setSubmitting(false);
         }
     };
 
-    
-    // Shared input styling: text-base on mobile prevents iOS auto-zoom-on-focus,
-    // sm:text-sm keeps things compact on larger screens. py-2 gives a comfortable
-    // 40px+ touch target on mobile, sm:py-0.5 tightens up on desktop.
     const inputBase =
         "flex-1 w-full bg-transparent border-b-2 border-stone-800 focus:border-amber-700 outline-none px-2 py-2 sm:py-0.5 text-base sm:text-sm font-semibold text-stone-900 placeholder:text-stone-400/80";
     const inputReadOnly =
@@ -488,20 +493,17 @@ export default function Form() {
             <div className="bg-[#FFFDF9] border-2 border-amber-800/40 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden print:border-amber-800/60 print:shadow-none print:rounded-xl">
 
                 <form onSubmit={handleSubmit}>
-                    {/* Wrap in Table for repeating print header on Page 2+ */}
                     <table className="w-full border-collapse">
                         <thead className="print-header-group">
                             <tr>
                                 <th className="p-0 font-normal border-none text-left">
                                     {/* Header Title Banner */}
                                     <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-3 px-3 sm:px-6 relative flex items-center justify-between border-b-2 border-amber-400 print:py-2">
-                                        {/* Left Decorative Motif */}
                                         <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
                                             <span>❖</span>
                                             <span className="w-6 h-[2px] bg-amber-400"></span>
                                         </div>
 
-                                        {/* Center Title Box matching physical reference receipt */}
                                         <div className="text-center mx-auto space-y-0.5">
                                             <p className="text-[11px] sm:text-sm font-bold text-amber-400">
                                                 ❖ जय संताजी ❖
@@ -519,7 +521,6 @@ export default function Form() {
                                             </div>
                                         </div>
 
-                                        {/* Right Decorative Motif */}
                                         <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
                                             <span className="w-6 h-[2px] bg-amber-400"></span>
                                             <span>❖</span>
@@ -564,7 +565,6 @@ export default function Form() {
                                                 />
                                             </div>
 
-                                            {/* Registration Fee Input */}
                                             <div className="flex items-center gap-2">
                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-sm sm:text-base">
                                                     नोंदणी शुल्क: रु.
@@ -591,7 +591,6 @@ export default function Form() {
                                                     </span>
                                                 </h3>
 
-                                                {/* Add Main Member Button */}
                                                 <button
                                                     type="button"
                                                     onClick={addMainMember}
@@ -601,13 +600,11 @@ export default function Form() {
                                                 </button>
                                             </div>
 
-                                            {/* List of Main Members */}
                                             {mainMembers.map((member, index) => (
                                                 <div
                                                     key={index}
                                                     className="p-3 sm:p-4 rounded-xl bg-white border-2 border-amber-700/30 shadow-xs relative space-y-3 print:p-2.5 print:space-y-2"
                                                 >
-                                                    {/* Header line for each Main Member */}
                                                     <div className="flex items-center justify-between border-b border-stone-200 pb-1.5 print:pb-1">
                                                         <div className="flex items-center gap-2">
                                                             <span className="w-5 h-5 rounded-full bg-[#7A0C0C] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
@@ -618,7 +615,6 @@ export default function Form() {
                                                             </h4>
                                                         </div>
 
-                                                        {/* Delete Main Member Button */}
                                                         {mainMembers.length > 1 && (
                                                             <button
                                                                 type="button"
@@ -630,9 +626,7 @@ export default function Form() {
                                                         )}
                                                     </div>
 
-                                                    {/* Member Fields Grid */}
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 print:gap-2">
-                                                        {/* Dynamic Member ID Label: प्राथमिक सदस्य क्रमांक, द्वितीय सदस्य क्रमांक, तृतीय... */}
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                 {getMemberOrdinalLabel(member.srNo)} :
@@ -645,7 +639,6 @@ export default function Form() {
                                                             />
                                                         </div>
 
-                                                        {/* Prabhag No */}
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-red-700 whitespace-nowrap text-xs sm:text-sm">
                                                                 प्रभाग क्रमांक :
@@ -661,7 +654,6 @@ export default function Form() {
                                                             />
                                                         </div>
 
-                                                        {/* Member Full Name */}
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                 सदस्याचे पूर्णनाव :
@@ -678,7 +670,6 @@ export default function Form() {
                                                             />
                                                         </div>
 
-                                                        {/* Mobile Number */}
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                 मोबाईल क्रमांक :
@@ -719,9 +710,8 @@ export default function Form() {
                                             />
                                         </div>
 
-                                        {/* FAMILY MEMBERS SECTION - Wrapped together so heading never separates from content */}
+                                        {/* FAMILY MEMBERS SECTION */}
                                         <div className="my-4 space-y-2 print:my-2 family-table-section">
-                                            {/* Section Header Banner Capsule */}
                                             <div className="flex flex-wrap items-center justify-center gap-2 my-2 print:my-1">
                                                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-amber-300 py-1 px-4 sm:px-5 rounded-full border-2 border-amber-400/80 shadow-md">
                                                     <span className="text-amber-400 text-xs font-bold">❖</span>
@@ -732,7 +722,7 @@ export default function Form() {
                                                 </div>
                                             </div>
 
-                                            {/* MOBILE VIEW: stacked cards (comfortable for small screens, no horizontal scrolling) */}
+                                            {/* Mobile View */}
                                             <div className="md:hidden space-y-3 print:hidden">
                                                 {familyMembers.length === 0 && (
                                                     <p className="text-center text-xs text-stone-500 italic py-2">
@@ -842,7 +832,7 @@ export default function Form() {
                                                 ))}
                                             </div>
 
-                                            {/* DESKTOP / TABLET / PRINT VIEW: table layout */}
+                                            {/* Desktop / Print Table View */}
                                             <div className="hidden md:block overflow-x-auto rounded-lg border-2 border-amber-700/40 shadow-xs print:block">
                                                 <table className="w-full text-left border-collapse min-w-[650px] print:min-w-full">
                                                     <thead>
@@ -859,12 +849,9 @@ export default function Form() {
                                                     <tbody className="divide-y divide-amber-800/30 text-stone-900 bg-white">
                                                         {familyMembers.map((member, index) => (
                                                             <tr key={index} className="hover:bg-amber-50/50 transition-colors">
-                                                                {/* Sr. No */}
                                                                 <td className="py-1 px-2 text-center font-bold text-stone-800 border-r border-amber-800/30 text-xs">
                                                                     {member.srNo}.
                                                                 </td>
-
-                                                                {/* Name */}
                                                                 <td className="py-0.5 px-2 border-r border-amber-800/30">
                                                                     <input
                                                                         type="text"
@@ -876,8 +863,6 @@ export default function Form() {
                                                                         className="w-full bg-transparent outline-none px-1 py-0.5 text-xs font-medium text-stone-900 focus:bg-amber-50 rounded"
                                                                     />
                                                                 </td>
-
-                                                                {/* Relation */}
                                                                 <td className="py-0.5 px-2 border-r border-amber-800/30">
                                                                     <input
                                                                         type="text"
@@ -889,8 +874,6 @@ export default function Form() {
                                                                         className="w-full bg-transparent outline-none px-1 py-0.5 text-xs font-medium text-stone-900 focus:bg-amber-50 rounded"
                                                                     />
                                                                 </td>
-
-                                                                {/* Date of Birth */}
                                                                 <td className="py-0.5 px-2 border-r border-amber-800/30">
                                                                     <input
                                                                         type="date"
@@ -901,8 +884,6 @@ export default function Form() {
                                                                         className="w-full bg-transparent outline-none px-1 py-0.5 text-xs font-medium text-stone-900 focus:bg-amber-50 rounded cursor-pointer"
                                                                     />
                                                                 </td>
-
-                                                                {/* Occupation / Education */}
                                                                 <td className="py-0.5 px-2 border-r border-amber-800/30">
                                                                     <input
                                                                         type="text"
@@ -914,8 +895,6 @@ export default function Form() {
                                                                         className="w-full bg-transparent outline-none px-1 py-0.5 text-xs font-medium text-stone-900 focus:bg-amber-50 rounded"
                                                                     />
                                                                 </td>
-
-                                                                {/* Mobile Number */}
                                                                 <td className="py-0.5 px-2 border-r border-amber-800/30">
                                                                     <input
                                                                         type="tel"
@@ -931,8 +910,6 @@ export default function Form() {
                                                                         className="w-full bg-transparent outline-none px-1 py-0.5 text-xs font-medium text-stone-900 focus:bg-amber-50 rounded"
                                                                     />
                                                                 </td>
-
-                                                                {/* Delete Family Member Row Button */}
                                                                 <td className="py-0.5 px-2 text-center print:hidden">
                                                                     <button
                                                                         type="button"
@@ -949,7 +926,6 @@ export default function Form() {
                                                 </table>
                                             </div>
 
-                                            {/* Add More Family Member Row Button */}
                                             <div className="flex justify-center sm:justify-end print:hidden">
                                                 <button
                                                     type="button"
@@ -977,7 +953,7 @@ export default function Form() {
                                             />
                                         </div>
 
-                                        {/* Payment Method Selection & Print Only Styling */}
+                                        {/* Payment Method Selection */}
                                         <div className="space-y-3 pt-1">
                                             <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 p-3 rounded-xl bg-amber-50/80 border border-amber-300/80 print:p-2">
                                                 <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
@@ -986,18 +962,21 @@ export default function Form() {
                                                     </label>
 
                                                     <div className="flex items-center gap-6 text-stone-900 font-semibold text-sm sm:text-sm">
-                                                        <label className="flex items-center gap-1.5 cursor-pointer min-h-[36px]">
+                                                        {/* Disabled Cash ("रोख") Radio Input */}
+                                                        <label className="flex items-center gap-1.5 cursor-not-allowed opacity-50 min-h-[36px]">
                                                             <input
                                                                 type="radio"
                                                                 name="paymentMethod"
                                                                 value="रोख"
                                                                 checked={formData.paymentMethod === "रोख"}
                                                                 onChange={handleChange}
-                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800"
+                                                                disabled
+                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-not-allowed"
                                                             />
                                                             <span>रोख</span>
                                                         </label>
 
+                                                        {/* Active UPI Radio Input */}
                                                         <label className="flex items-center gap-1.5 cursor-pointer min-h-[36px]">
                                                             <input
                                                                 type="radio"
@@ -1010,40 +989,9 @@ export default function Form() {
                                                             <span>UPI</span>
                                                         </label>
                                                     </div>
-
-                                                    {/* Cash Paid Yes / No Radio Buttons for web view */}
-                                                    {formData.paymentMethod === "रोख" && (
-                                                        <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 bg-white px-3 py-2 sm:py-1 rounded-lg border border-amber-400 shadow-xs text-xs font-extrabold text-stone-900 print:hidden">
-                                                            <span>💵 रोख रक्कम भरली गेली का? :</span>
-                                                            <div className="flex items-center gap-3">
-                                                                <label className="flex items-center gap-1 cursor-pointer hover:text-emerald-700 min-h-[32px]">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="cashPaidStatus"
-                                                                        value="yes"
-                                                                        checked={cashPaidStatus === "yes"}
-                                                                        onChange={() => setCashPaidStatus("yes")}
-                                                                        className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-emerald-700 cursor-pointer"
-                                                                    />
-                                                                    <span className="text-emerald-800 font-bold">होय (Yes)</span>
-                                                                </label>
-                                                                <label className="flex items-center gap-1 cursor-pointer hover:text-red-700 min-h-[32px]">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="cashPaidStatus"
-                                                                        value="no"
-                                                                        checked={cashPaidStatus === "no"}
-                                                                        onChange={() => setCashPaidStatus("no")}
-                                                                        className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-red-700 cursor-pointer"
-                                                                    />
-                                                                    <span className="text-red-700 font-bold">नाही (No)</span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
 
-                                                {/* Payment Received Status Confirmation Badge */}
+                                                {/* Payment Verification Badge */}
                                                 {isPaymentVerified && (
                                                     <div className="flex items-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-full bg-emerald-100 border border-emerald-400 text-emerald-950 text-xs font-extrabold shadow-xs">
                                                         <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
@@ -1052,7 +1000,7 @@ export default function Form() {
                                                 )}
                                             </div>
 
-                                            {/* Interactive Payment Container for Web View (QR code + upload for screen view, hidden on print/PDF) */}
+                                            {/* UPI QR & Upload Section */}
                                             {formData.paymentMethod === "UPI" && (
                                                 <div className="mt-3 p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-500/60 shadow-lg max-w-sm mx-auto text-center space-y-3 print:hidden">
                                                     <p className="text-xs font-bold text-amber-950 flex items-center justify-center gap-1.5">
@@ -1104,7 +1052,6 @@ export default function Form() {
                                                                 className="hidden"
                                                             />
 
-                                                            {/* Screenshot Preview Card */}
                                                             {screenshotPreview && (
                                                                 <div className="relative w-full p-2 bg-emerald-50 rounded-xl border border-emerald-400 shadow-xs flex items-center gap-3 mt-1">
                                                                     <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-emerald-300 flex-shrink-0">
@@ -1130,7 +1077,6 @@ export default function Form() {
                                                 </div>
                                             )}
 
-                                            {/* Error Message if Screenshot is missing */}
                                             {screenshotError && (
                                                 <div className="p-2.5 rounded-xl bg-red-100 border border-red-400 text-red-900 font-bold text-center text-xs print:hidden">
                                                     {screenshotError}
@@ -1138,7 +1084,7 @@ export default function Form() {
                                             )}
                                         </div>
 
-                                        {/* Sandesh (Message) Box with Typing Animation on verification */}
+                                        {/* Sandesh Box */}
                                         {isPaymentVerified && (
                                             <div className="mt-4 p-3 rounded-xl bg-amber-50/90 border-2 border-amber-600/40 text-stone-900 shadow-xs print:p-2">
                                                 <p className="text-xs sm:text-sm leading-relaxed font-semibold flex items-start gap-2">
@@ -1155,14 +1101,14 @@ export default function Form() {
                                             </div>
                                         )}
 
-                                        {/* Footer Official Proof Notice */}
+                                        {/* Footer Notice */}
                                         <div className="hidden print:block text-center pt-2 border-t border-amber-200 mt-2">
                                             <p className="text-[11px] font-extrabold text-[#7A0C0C]">
                                                 ही पावती सदस्य नोंदणीचा अधिकृत पुरावा म्हणून जतन करावी.
                                             </p>
                                         </div>
 
-                                        {/* Submitted Alert Message & Database Feedback */}
+                                        {/* Feedback alerts */}
                                         {submitSuccessMsg && (
                                             <div className="p-3.5 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-emerald-950 font-bold text-center text-xs sm:text-sm print:hidden shadow-sm">
                                                 {submitSuccessMsg}
@@ -1175,7 +1121,7 @@ export default function Form() {
                                             </div>
                                         )}
 
-                                        {/* Action Button — Single Combined Submit & Print Button */}
+                                        {/* Submit & Print Button */}
                                         <div className="flex items-center justify-center pt-2 print:hidden">
                                             <button
                                                 type="submit"
