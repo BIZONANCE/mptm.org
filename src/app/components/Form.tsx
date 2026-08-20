@@ -103,6 +103,53 @@ function convertNumberToMarathiWords(amountStr: string): string {
     return words.trim() + " रुपये फक्त";
 }
 
+function formatDateToDDMMYYYY(dateInput: string | Date | null | undefined): string {
+    if (!dateInput) return "";
+
+    if (dateInput instanceof Date) {
+        if (isNaN(dateInput.getTime())) return "";
+        const day = String(dateInput.getDate()).padStart(2, "0");
+        const month = String(dateInput.getMonth() + 1).padStart(2, "0");
+        const year = dateInput.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    const str = String(dateInput).trim();
+    if (!str) return "";
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(str)) {
+        return str;
+    }
+
+    const isoMatch = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (isoMatch) {
+        const [, yyyy, mm, dd] = isoMatch;
+        return `${dd.padStart(2, "0")}/${mm.padStart(2, "0")}/${yyyy}`;
+    }
+
+    const dashMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+    if (dashMatch) {
+        const [, dd, mm, yyyy] = dashMatch;
+        return `${dd.padStart(2, "0")}/${mm.padStart(2, "0")}/${yyyy}`;
+    }
+
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    return str;
+}
+
+function formatReceiptNo(seq: number, dateStr?: string): string {
+    const year = dateStr ? new Date(dateStr).getFullYear() : new Date().getFullYear();
+    const validYear = isNaN(year) ? new Date().getFullYear() : year;
+    return `MPTM-${validYear}-AMT-R${String(seq).padStart(3, "0")}`;
+}
+
 export default function Form() {
     const DEFAULT_BASE_FEE = 101;
     const FULL_SANDESH_MESSAGE = "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या प्राथमिक सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली.";
@@ -110,12 +157,15 @@ export default function Form() {
     const [baseMemberSeq, setBaseMemberSeq] = useState(1);
     const [receiptSeq, setReceiptSeq] = useState(1);
 
-    const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq) =>
-        `AVA${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+    const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq, dateStr?: string) => {
+        const year = dateStr ? new Date(dateStr).getFullYear() : new Date().getFullYear();
+        const validYear = isNaN(year) ? new Date().getFullYear() : year;
+        return `MPTM-${validYear}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+    };
 
     // Main Members list (Default 1 Main Member)
     const [mainMembers, setMainMembers] = useState<MainMember[]>([
-        { srNo: 1, memberNo: "AVA001", fullName: "", mobileNo: "", prabhagNo: "" },
+        { srNo: 1, memberNo: formatMemberNo(1, 1), fullName: "", mobileNo: "", prabhagNo: "" },
     ]);
 
     // Family Members table (Initial 1 row default)
@@ -126,7 +176,7 @@ export default function Form() {
     const initialFee = DEFAULT_BASE_FEE * 1; // ₹101 by default
 
     const [formData, setFormData] = useState({
-        receiptNo: "MPTM001",
+        receiptNo: formatReceiptNo(1),
         date: new Date().toISOString().split("T")[0],
         registrationFee: initialFee.toString(),
         address: "",
@@ -148,11 +198,52 @@ export default function Form() {
         (formData.paymentMethod === "रोख" && cashPaidStatus === "yes") ||
         (formData.paymentMethod === "UPI" && Boolean(paymentScreenshot));
 
+    // Helper to attempt API requests across candidate URLs with retries
+    const fetchWithFallback = async (endpoint: string, options?: RequestInit): Promise<Response> => {
+        const envUrl = process.env.NEXT_PUBLIC_API_URL;
+        const candidateUrls = [
+            envUrl,
+            "http://localhost:5007",
+            "http://localhost:5000",
+            "https://api.mptmamravati.org"
+        ].filter((url, index, self): url is string => Boolean(url) && self.indexOf(url) === index);
+
+        let lastError: any = null;
+
+        for (const baseUrl of candidateUrls) {
+            try {
+                const targetUrl = `${baseUrl.replace(/\/$/, "")}${endpoint}`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const response = await fetch(targetUrl, {
+                    ...options,
+                    signal: controller.signal,
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    return response;
+                }
+
+                // If non-200, check content type; if it's JSON, return it so caller handles API errors
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response;
+                }
+            } catch (err) {
+                lastError = err;
+                console.warn(`Connection failed for ${baseUrl}${endpoint}, trying next candidate...`, err);
+            }
+        }
+
+        throw lastError || new Error("सर्व्हरशी संपर्क साधता आला नाही. कृपया बॅकएंड सर्व्हर सुरू असल्याची खात्री करा.");
+    };
+
     // Fetch unique next receipt and member numbers safely from Backend API
     const fetchNextNumbers = async () => {
         try {
-            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-            const res = await fetch(`${backendUrl}/api/next-numbers`);
+            const res = await fetchWithFallback("/api/next-numbers");
 
             if (!res.ok) {
                 console.warn(`Backend sequence API returned status ${res.status}`);
@@ -177,11 +268,10 @@ export default function Form() {
                 if (data.nextMemberSeq) {
                     const startSeq = data.nextMemberSeq;
                     setBaseMemberSeq(startSeq);
-                    const currentYear = new Date().getFullYear();
                     setMainMembers((prev) =>
                         prev.map((m, idx) => ({
                             ...m,
-                            memberNo: `AVA${String(startSeq + idx).padStart(3, "0")}`,
+                            memberNo: data.nextMemberNo && idx === 0 ? data.nextMemberNo : formatMemberNo(idx + 1, startSeq, formData.date),
                         }))
                     );
                 }
@@ -241,7 +331,10 @@ export default function Form() {
     ) => {
         const { name, value } = e.target;
 
-        if (name === "registrationFee") {
+        if (name === "paymentMethod") {
+            setFormData((prev) => ({ ...prev, paymentMethod: value }));
+            setCashPaidStatus("");
+        } else if (name === "registrationFee") {
             setFormData((prev) => ({
                 ...prev,
                 registrationFee: value,
@@ -432,8 +525,7 @@ export default function Form() {
         setSubmitSuccessMsg("");
 
         try {
-            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-            const response = await fetch(`${backendUrl}/api/register`, {
+            const response = await fetchWithFallback("/api/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -453,7 +545,7 @@ export default function Form() {
             // Safeguard against HTML 404 / 500 error pages
             const contentType = response.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("सर्व्हरने अयोग्य प्रतिसाद (HTML) दिला. कृपया बॅकएंड सर्व्हर port 5000 वर सुरू असल्याची खात्री करा.");
+                throw new Error("सर्व्हरने अयोग्य प्रतिसाद (HTML) दिला. कृपया बॅकएंड सर्व्हर सुरू असल्याची खात्री करा.");
             }
 
             const result = await response.json();
@@ -467,7 +559,7 @@ export default function Form() {
                 // Auto-refresh form fields for the next submission after printing
                 setTimeout(async () => {
                     setFormData({
-                        receiptNo: "MPTM001",
+                        receiptNo: formatReceiptNo(receiptSeq + 1),
                         date: new Date().toISOString().split("T")[0],
                         registrationFee: "101",
                         address: "",
@@ -478,7 +570,7 @@ export default function Form() {
                     setMainMembers([
                         {
                             srNo: 1,
-                            memberNo: "AVA001",
+                            memberNo: formatMemberNo(1, baseMemberSeq + 1),
                             fullName: "",
                             mobileNo: "",
                             prabhagNo: "",
@@ -989,17 +1081,16 @@ export default function Form() {
                                                         देयक पद्धत :
                                                     </label>
 
-                                                    <div className="flex items-center gap-6 text-stone-900 font-semibold text-sm sm:text-sm">
-                                                        {/* Disabled Cash ("रोख") Radio Input */}
-                                                        <label className="flex items-center gap-1.5 cursor-not-allowed opacity-50 min-h-[36px]">
+                                                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-stone-900 font-semibold text-sm sm:text-sm">
+                                                        {/* Enabled Cash ("रोख") Radio Input */}
+                                                        <label className="flex items-center gap-1.5 cursor-pointer min-h-[36px]">
                                                             <input
                                                                 type="radio"
                                                                 name="paymentMethod"
                                                                 value="रोख"
                                                                 checked={formData.paymentMethod === "रोख"}
                                                                 onChange={handleChange}
-                                                                disabled
-                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-not-allowed"
+                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-pointer"
                                                             />
                                                             <span>रोख</span>
                                                         </label>
@@ -1016,6 +1107,39 @@ export default function Form() {
                                                             />
                                                             <span>UPI</span>
                                                         </label>
+
+                                                        {/* Inline Cash Payment Confirmation */}
+                                                        {formData.paymentMethod === "रोख" && (
+                                                            <div className="flex items-center gap-2 sm:pl-3 sm:border-l-2 border-amber-400 text-xs print:hidden">
+                                                                <span className="font-extrabold text-amber-950 whitespace-nowrap">
+                                                                    रक्कम भरली? :
+                                                                </span>
+                                                                <div className="flex items-center gap-2">
+                                                                    <label className={`flex items-center gap-1 cursor-pointer font-bold text-xs px-2.5 py-1 rounded-lg border transition-all ${cashPaidStatus === "yes" ? "bg-emerald-600 text-white border-emerald-700 shadow-xs" : "bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100"}`}>
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="cashPaidStatus"
+                                                                            value="yes"
+                                                                            checked={cashPaidStatus === "yes"}
+                                                                            onChange={() => setCashPaidStatus("yes")}
+                                                                            className="w-3.5 h-3.5 accent-emerald-700 cursor-pointer"
+                                                                        />
+                                                                        <span>होय (Yes)</span>
+                                                                    </label>
+                                                                    <label className={`flex items-center gap-1 cursor-pointer font-bold text-xs px-2.5 py-1 rounded-lg border transition-all ${cashPaidStatus === "no" ? "bg-red-600 text-white border-red-700 shadow-xs" : "bg-red-50 text-red-900 border-red-300 hover:bg-red-100"}`}>
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="cashPaidStatus"
+                                                                            value="no"
+                                                                            checked={cashPaidStatus === "no"}
+                                                                            onChange={() => setCashPaidStatus("no")}
+                                                                            className="w-3.5 h-3.5 accent-red-700 cursor-pointer"
+                                                                        />
+                                                                        <span>नाही (No)</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
