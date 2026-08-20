@@ -259,22 +259,20 @@ export default function Form() {
             const data = await res.json();
 
             if (data.success) {
-                if (data.nextReceiptSeq) {
-                    setReceiptSeq(data.nextReceiptSeq);
-                }
-                if (data.receiptNo) {
-                    setFormData((prev) => ({ ...prev, receiptNo: data.receiptNo }));
-                }
-                if (data.nextMemberSeq) {
-                    const startSeq = data.nextMemberSeq;
-                    setBaseMemberSeq(startSeq);
-                    setMainMembers((prev) =>
-                        prev.map((m, idx) => ({
-                            ...m,
-                            memberNo: data.nextMemberNo && idx === 0 ? data.nextMemberNo : formatMemberNo(idx + 1, startSeq, formData.date),
-                        }))
-                    );
-                }
+                const rSeq = data.nextReceiptSeq || 1;
+                const mSeq = data.nextMemberSeq || 1;
+                setReceiptSeq(rSeq);
+                setBaseMemberSeq(mSeq);
+                setFormData((prev) => ({
+                    ...prev,
+                    receiptNo: formatReceiptNo(rSeq, prev.date),
+                }));
+                setMainMembers((prev) =>
+                    prev.map((m, idx) => ({
+                        ...m,
+                        memberNo: formatMemberNo(idx + 1, mSeq, formData.date),
+                    }))
+                );
             }
         } catch (err) {
             console.error("Error fetching next sequence numbers:", err);
