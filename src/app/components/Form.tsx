@@ -552,7 +552,7 @@ export default function Form() {
 
             if (result.success) {
                 setSubmitSuccessMsg("✅ सदस्य नोंदणी यशस्वीरित्या जतन झाली!");
-                
+
                 // Open browser print dialog for receipt
                 window.print();
 
@@ -598,7 +598,7 @@ export default function Form() {
         }
     };
 
-    
+
     // Shared input styling: text-base on mobile prevents iOS auto-zoom-on-focus,
     // sm:text-sm keeps things compact on larger screens. py-2 gives a comfortable
     // 40px+ touch target on mobile, sm:py-0.5 tightens up on desktop.
@@ -636,7 +636,7 @@ export default function Form() {
                                             </p>
                                             <div className="inline-block mt-1">
                                                 <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-amber-100 font-extrabold text-[10px] sm:text-sm px-3 sm:px-4 py-0.5 rounded-full border border-amber-400 shadow-xs">
-                                                 नोंदणी पावती
+                                                    नोंदणी पावती
                                                 </span>
                                             </div>
                                         </div>
