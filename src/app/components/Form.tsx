@@ -163,6 +163,19 @@ export default function Form() {
         return `MPTM-${validYear}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
     };
 
+    // Referral link tracking
+    const [referredBy, setReferredBy] = useState<string>("");
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const params = new URLSearchParams(window.location.search);
+            const refParam = params.get("ref");
+            if (refParam) {
+                setReferredBy(refParam.trim());
+            }
+        }
+    }, []);
+
     // Main Members list (Default 1 Main Member)
     const [mainMembers, setMainMembers] = useState<MainMember[]>([
         { srNo: 1, memberNo: formatMemberNo(1, 1), fullName: "", mobileNo: "", prabhagNo: "" },
@@ -530,6 +543,7 @@ export default function Form() {
                     formData: {
                         ...formData,
                         date: formatDateToDDMMYYYY(formData.date),
+                        referredBy: referredBy || "Direct Website",
                     },
                     mainMembers,
                     familyMembers: familyMembers.map((fm) => ({
@@ -537,6 +551,7 @@ export default function Form() {
                         dob: formatDateToDDMMYYYY(fm.dob),
                     })),
                     paymentScreenshot: screenshotPreview,
+                    referredBy: referredBy || "Direct Website",
                 }),
             });
 
