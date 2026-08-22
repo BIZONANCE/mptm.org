@@ -194,7 +194,7 @@ export default function Form() {
         registrationFee: initialFee.toString(),
         address: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
-        paymentMethod: "रोख",
+        paymentMethod: "UPI",
         otherPaymentMethod: "",
     });
 
@@ -1095,15 +1095,16 @@ export default function Form() {
                                                     </label>
 
                                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-stone-900 font-semibold text-sm sm:text-sm">
-                                                        {/* Enabled Cash ("रोख") Radio Input */}
-                                                        <label className="flex items-center gap-1.5 cursor-pointer min-h-[36px]">
+                                                        {/* Disabled Cash ("रोख") Radio Input */}
+                                                        <label className="flex items-center gap-1.5 cursor-not-allowed opacity-50 min-h-[36px]">
                                                             <input
                                                                 type="radio"
                                                                 name="paymentMethod"
                                                                 value="रोख"
                                                                 checked={formData.paymentMethod === "रोख"}
                                                                 onChange={handleChange}
-                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-pointer"
+                                                                disabled
+                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-not-allowed"
                                                             />
                                                             <span>रोख</span>
                                                         </label>
