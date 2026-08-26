@@ -38,8 +38,26 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
-  const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
+  const getApiUrl = (): string => {
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
+      if (host.includes("mptm.org")) return "https://api.mptm.org";
+    }
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
+  };
+
+  const getAdminUrl = (): string => {
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      if (host.includes("mptmamravati.org")) return "https://admin.mptmamravati.org";
+      if (host.includes("mptm.org")) return "https://admin.mptm.org";
+    }
+    return process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
+  };
+
+  const API_URL = getApiUrl();
+  const ADMIN_URL = getAdminUrl();
 
   if (!isOpen) return null;
 
