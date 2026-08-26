@@ -12,7 +12,6 @@ type FormState = {
   name: string;
   email: string;
   phone: string;
-  position: string;
   message: string;
   resume: File | null;
 };
@@ -23,13 +22,12 @@ export default function CareerPage() {
     name: "",
     email: "",
     phone: "",
-    position: "कार्यालय सहाय्यक",
     message: "",
     resume: null,
   });
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -52,7 +50,6 @@ export default function CareerPage() {
       name: "",
       email: "",
       phone: "",
-      position: "कार्यालय सहाय्यक",
       message: "",
       resume: null,
     });
@@ -96,27 +93,8 @@ export default function CareerPage() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404] border-b border-slate-100 pb-3">
-              Apply for नोकरी अर्ज
+              Apply for कार्यालय सहाय्यक
             </h2>
-
-            {/* Position Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                पद (Position) *
-              </label>
-              <select
-                name="position"
-                value={formData.position}
-                onChange={handleInputChange}
-                required
-                className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white cursor-pointer"
-              >
-                <option value="कार्यालय सहाय्यक">कार्यालय सहाय्यक (Office Assistant)</option>
-                <option value="सामाजिक कार्यकर्ता">सामाजिक कार्यकर्ता (Social Worker)</option>
-                <option value="डेटा एंट्री ऑपरेटर">डेटा एंट्री ऑपरेटर (Data Entry Operator)</option>
-                <option value="इतर">इतर (Other)</option>
-              </select>
-            </div>
 
             {/* Name */}
             <div>
