@@ -39,7 +39,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
-  const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3000";
+  const ADMIN_URL = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
 
   if (!isOpen) return null;
 
@@ -137,7 +137,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       const redirectPath = targetRole === "SUPER_ADMIN" ? "/" : "/registrations";
       const targetUrl = `${ADMIN_URL}${redirectPath}?role=${targetRole}&username=${encodeURIComponent(emailTrimmed)}`;
-      window.open(targetUrl, "_blank");
+      window.location.href = targetUrl;
       onClose();
     } catch (err: any) {
       console.error("Login verification error:", err);
@@ -178,7 +178,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               localStorage.setItem("mptm_admin_username", data.admin?.username || enteredUser);
               localStorage.setItem("mptm_admin_role", "SUPER_ADMIN");
             }
-            window.open(`${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(data.admin?.username || enteredUser)}`, "_blank");
+            window.location.href = `${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(data.admin?.username || enteredUser)}`;
             onClose();
             return;
           }
@@ -193,7 +193,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             localStorage.setItem("mptm_admin_username", enteredUser);
             localStorage.setItem("mptm_admin_role", "SUPER_ADMIN");
           }
-          window.open(`${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(enteredUser)}`, "_blank");
+          window.location.href = `${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(enteredUser)}`;
           onClose();
           return;
         } else {
@@ -454,8 +454,21 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </button>
             </form>
           )}
+
+          {/* Footer Link to Direct Admin Login Page */}
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>किंवा डॅशबोर्ड लॉगिन पेजवर जा:</span>
+            <a
+              href={`${ADMIN_URL}/login`}
+              className="font-bold text-amber-700 hover:text-amber-900 underline flex items-center gap-1"
+            >
+              <span>Admin Login Page</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
