@@ -170,7 +170,7 @@ export default function Form() {
         if (typeof window !== "undefined") {
             const params = new URLSearchParams(window.location.search);
             const refParam = params.get("ref");
-            if (refParam) {
+            if (refParam && refParam.trim()) {
                 setReferredBy(refParam.trim());
             }
         }
@@ -197,6 +197,13 @@ export default function Form() {
         paymentMethod: "UPI",
         otherPaymentMethod: "",
     });
+
+    // Ensure payment method defaults to UPI if cash is disabled (no referral link)
+    useEffect(() => {
+        if (!referredBy && formData.paymentMethod === "रोख") {
+            setFormData((prev) => ({ ...prev, paymentMethod: "UPI" }));
+        }
+    }, [referredBy, formData.paymentMethod]);
 
     const [cashPaidStatus, setCashPaidStatus] = useState<"yes" | "no" | "">("");
     const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
@@ -1095,18 +1102,36 @@ export default function Form() {
                                                     </label>
 
                                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-stone-900 font-semibold text-sm sm:text-sm">
-                                                        {/* Disabled Cash ("रोख") Radio Input */}
-                                                        <label className="flex items-center gap-1.5 cursor-not-allowed opacity-50 min-h-[36px]">
+                                                        {/* Cash ("रोख") Radio Input - Only enabled when accessed via user referral link */}
+                                                        <label
+                                                            className={`flex items-center gap-1.5 min-h-[36px] ${
+                                                                referredBy
+                                                                    ? "cursor-pointer text-stone-900"
+                                                                    : "cursor-not-allowed opacity-50 text-stone-500"
+                                                            }`}
+                                                            title={
+                                                                referredBy
+                                                                    ? "रोख देयक निवडा"
+                                                                    : "रोख पर्याय फक्त युझरच्या अधिकृत लिंकद्वारेच उपलब्ध आहे"
+                                                            }
+                                                        >
                                                             <input
                                                                 type="radio"
                                                                 name="paymentMethod"
                                                                 value="रोख"
                                                                 checked={formData.paymentMethod === "रोख"}
                                                                 onChange={handleChange}
-                                                                disabled
-                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 cursor-not-allowed"
+                                                                disabled={!referredBy}
+                                                                className={`w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 ${
+                                                                    referredBy ? "cursor-pointer" : "cursor-not-allowed"
+                                                                }`}
                                                             />
                                                             <span>रोख</span>
+                                                            {!referredBy && (
+                                                                <span className="text-[10px] text-amber-800/80 font-normal print:hidden">
+                                                                    (युझर लिंकद्वारेच उपलब्ध)
+                                                                </span>
+                                                            )}
                                                         </label>
 
                                                         {/* Active UPI Radio Input */}
