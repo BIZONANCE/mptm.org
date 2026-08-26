@@ -155,7 +155,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       const redirectPath = targetRole === "SUPER_ADMIN" ? "/" : "/registrations";
       const targetUrl = `${ADMIN_URL}${redirectPath}?role=${targetRole}&username=${encodeURIComponent(emailTrimmed)}`;
-      window.location.href = targetUrl;
+      window.open(targetUrl, "_blank");
       onClose();
     } catch (err: any) {
       console.error("Login verification error:", err);
@@ -196,7 +196,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               localStorage.setItem("mptm_admin_username", data.admin?.username || enteredUser);
               localStorage.setItem("mptm_admin_role", "SUPER_ADMIN");
             }
-            window.location.href = `${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(data.admin?.username || enteredUser)}`;
+            window.open(`${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(data.admin?.username || enteredUser)}`, "_blank");
             onClose();
             return;
           }
@@ -211,7 +211,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             localStorage.setItem("mptm_admin_username", enteredUser);
             localStorage.setItem("mptm_admin_role", "SUPER_ADMIN");
           }
-          window.location.href = `${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(enteredUser)}`;
+          window.open(`${ADMIN_URL}/?role=SUPER_ADMIN&username=${encodeURIComponent(enteredUser)}`, "_blank");
           onClose();
           return;
         } else {
@@ -478,6 +478,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <span>किंवा डॅशबोर्ड लॉगिन पेजवर जा:</span>
             <a
               href={`${ADMIN_URL}/login`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-bold text-amber-700 hover:text-amber-900 underline flex items-center gap-1"
             >
               <span>Admin Login Page</span>
