@@ -6,6 +6,7 @@ import {
   Send,
   ShieldCheck,
   CheckCircle2,
+  Check,
   AlertCircle,
   Eye,
   EyeOff,
@@ -135,7 +136,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setGeneratedOtp(data.code || "");
         setOtpStep("SENT");
         setSuccessMsg(
-          `✅ पडताळणी कोड (OTP Code) ${emailTrimmed} वर पाठवला गेला आहे! इमेल इनबॉक्स किंवा स्पॅम फोल्डर तपासा.`
+          `पडताळणी कोड (OTP Code) ${emailTrimmed} वर पाठवला गेला आहे! इमेल इनबॉक्स किंवा स्पॅम फोल्डर तपासा.`
         );
       } else {
         setLoginError(
@@ -353,13 +354,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
           )}
 
-          {successMsg && (
-            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
           {/* TAB 1: USER LOGIN (EMAIL OTP) */}
           {loginMode === "USER_OTP" && (
             <div className="space-y-4">
@@ -422,6 +416,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       इमेल बदला
                     </button>
                   </div>
+
+                  {successMsg && (
+                    <div className="text-xs font-semibold text-slate-900 flex items-start gap-2 pt-1 animate-in fade-in">
+                      <Check className="w-4 h-4 shrink-0 text-slate-900 mt-0.5" />
+                      <span className="leading-snug">{successMsg}</span>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-2">
