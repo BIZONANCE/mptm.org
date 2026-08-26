@@ -28,6 +28,53 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [generatedOtp, setGeneratedOtp] = useState<string>("");
   const [inputOtp, setInputOtp] = useState<string>("");
 
+  // 6-digit OTP boxes state & refs
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const otpInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleOtpDigitChange = (index: number, val: string) => {
+    const cleanVal = val.replace(/\D/g, "");
+    if (!cleanVal) {
+      const updated = [...otpDigits];
+      updated[index] = "";
+      setOtpDigits(updated);
+      setInputOtp(updated.join(""));
+      return;
+    }
+
+    const digit = cleanVal.slice(-1);
+    const updated = [...otpDigits];
+    updated[index] = digit;
+    setOtpDigits(updated);
+    setInputOtp(updated.join(""));
+
+    if (index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+
+    const newDigits = ["", "", "", "", "", ""];
+    for (let i = 0; i < pasted.length; i++) {
+      newDigits[i] = pasted[i];
+    }
+    setOtpDigits(newDigits);
+    setInputOtp(newDigits.join(""));
+
+    const focusIndex = Math.min(pasted.length - 1, 5);
+    otpInputRefs.current[focusIndex]?.focus();
+  };
+
   // Super Admin Login state
   const [adminUsername, setAdminUsername] = useState<string>("");
   const [adminPassword, setAdminPassword] = useState<string>("");
@@ -366,6 +413,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       onClick={() => {
                         setOtpStep("IDLE");
                         setInputOtp("");
+                        setOtpDigits(["", "", "", "", "", ""]);
                         setSuccessMsg(null);
                         setLoginError(null);
                       }}
@@ -376,18 +424,29 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 mb-2">
                       ६-अंकी पडताळणी कोड (Enter 6-Digit OTP Code) <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      maxLength={6}
-                      required
-                      placeholder="६-अंकी कोड (उदा. 123456)"
-                      value={inputOtp}
-                      onChange={(e) => setInputOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-base font-bold font-mono tracking-widest text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
-                    />
+                    <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+                      {otpDigits.map((digit, idx) => (
+                        <input
+                          key={idx}
+                          ref={(el) => { otpInputRefs.current[idx] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                          onPaste={handleOtpPaste}
+                          className={`w-10 h-12 sm:w-11 sm:h-13 text-center text-xl font-extrabold font-mono text-slate-900 border rounded-xl transition-all shadow-2xs ${
+                            digit
+                              ? "border-blue-600 bg-blue-50/40 text-blue-900 ring-1 ring-blue-600"
+                              : "border-slate-300 bg-slate-50 hover:bg-white focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
 
                   <button
