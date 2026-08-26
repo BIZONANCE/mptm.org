@@ -19,17 +19,17 @@ export default function Footer() {
           href="https://bizonance.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#4A0404] hover:opacity-90 transition group"
+          className="inline-flex items-center gap-2.5 text-sm sm:text-base font-bold text-[#4A0404] hover:opacity-90 transition group"
         >
           <span className="leading-none flex items-center">Developed by</span>
           <div className="flex items-center justify-center shrink-0">
             <Image
               src="/bizonance.png"
               alt="Bizonance"
-              width={110}
-              height={26}
+              width={130}
+              height={32}
               priority
-              className="h-5 sm:h-6 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+              className="h-6 sm:h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
             />
           </div>
         </a>
