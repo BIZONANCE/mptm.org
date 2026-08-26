@@ -61,10 +61,10 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 lg:px-4 py-2 text-base lg:text-lg font-bold transition-all rounded-xl ${
+                    className={`px-3 lg:px-4 py-2 text-base lg:text-lg font-bold transition-colors ${
                       isActive
-                        ? "text-amber-400 bg-amber-400/10 border-b-2 border-amber-400 shadow-xs"
-                        : "text-white hover:text-amber-400 hover:bg-white/5"
+                        ? "text-amber-400"
+                        : "text-white hover:text-amber-400"
                     }`}
                   >
                     {link.label}
@@ -122,7 +122,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className={`px-3 py-3 text-base font-bold transition-all border-b border-amber-500/10 last:border-b-0 ${
                     isActive
-                      ? "text-amber-400 bg-amber-400/10 pl-4 border-l-4 border-l-amber-400"
+                      ? "text-amber-400 font-extrabold"
                       : "text-white hover:text-amber-400"
                   }`}
                 >
