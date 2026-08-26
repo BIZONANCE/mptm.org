@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Eye, Target, Users, HeartHandshake, Globe, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -50,6 +51,17 @@ export default function AboutPage() {
             आमचा उद्देश समाजातील प्रत्येक घटकाला सक्षम बनवणे आणि त्यांना मुख्य
             प्रवाहात आणणे हा आहे. सामाजिक बांधिलकी जपत संस्था निरंतर कार्यरत आहे.
           </p>
+
+          {/* Registration CTA Button */}
+          <div className="pt-6">
+            <Link
+              href="/registration"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-extrabold text-base sm:text-lg px-6 py-3.5 rounded-full border-2 border-amber-400 shadow-lg hover:shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all duration-300"
+            >
+              <span>🚩 ऑनलाईन सदस्य नोंदणी करा</span>
+              <span className="text-amber-200 font-bold ml-1">→</span>
+            </Link>
+          </div>
         </div>
       </section>
 

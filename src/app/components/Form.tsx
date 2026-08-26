@@ -1127,11 +1127,6 @@ export default function Form() {
                                                                 }`}
                                                             />
                                                             <span>रोख</span>
-                                                            {!referredBy && (
-                                                                <span className="text-[10px] text-amber-800/80 font-normal print:hidden">
-                                                                    (युझर लिंकद्वारेच उपलब्ध)
-                                                                </span>
-                                                            )}
                                                         </label>
 
                                                         {/* Active UPI Radio Input */}
