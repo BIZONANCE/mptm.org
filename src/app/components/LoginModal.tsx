@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import {
   Mail,
   Send,
@@ -119,7 +120,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     const emailLower = emailTrimmed.toLowerCase();
 
     if (!emailTrimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
-      setLoginError("⚠️ कृपया वैध इमेल आयडी प्रविष्ट करा!");
+      setLoginError("⚠️ Please enter a valid email address!");
       return;
     }
 
@@ -136,16 +137,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setGeneratedOtp(data.code || "");
         setOtpStep("SENT");
         setSuccessMsg(
-          `पडताळणी कोड (OTP Code) ${emailTrimmed} वर पाठवला गेला आहे! इमेल इनबॉक्स किंवा स्पॅम फोल्डर तपासा.`
+          `Verification code (OTP) sent to ${emailTrimmed}! Please check your email inbox or spam folder.`
         );
       } else {
         setLoginError(
-          data.error || "⚠️ पडताळणी कोड पाठवताना त्रुटी आली. इमेल नोंदणीकृत असल्याची खात्री करा."
+          data.error || "⚠️ Error sending verification code. Please ensure your email is registered."
         );
       }
     } catch (err: any) {
       console.error("OTP send error:", err);
-      setLoginError("अनपेक्षित सर्व्हर त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
+      setLoginError("Unexpected server error. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +160,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
     const emailTrimmed = userEmailInput.trim();
     if (!inputOtp.trim()) {
-      setLoginError("⚠️ कृपया ६-अंकी पडताळणी कोड प्रविष्ट करा!");
+      setLoginError("⚠️ Please enter the 6-digit verification code!");
       return;
     }
 
@@ -186,7 +187,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       if (!verified) {
-        setLoginError("⚠️ प्रविष्ट केलेला पडताळणी कोड चुकीचा आहे!");
+        setLoginError("⚠️ The entered verification code is incorrect!");
         return;
       }
 
@@ -207,7 +208,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       onClose();
     } catch (err: any) {
       console.error("Login verification error:", err);
-      setLoginError("अनपेक्षित त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
+      setLoginError("Unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -263,15 +264,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           onClose();
           return;
         } else {
-          setLoginError("मुख्य प्रशासकाचा पासवर्ड चुकीचा आहे!");
+          setLoginError("Invalid Super Admin password!");
           return;
         }
       } else {
-        setLoginError("हा मुख्य प्रशासकाचा युझरनेम नाही! कृपया युझरनेम तपासा.");
+        setLoginError("Invalid Super Admin username! Please check your credentials.");
       }
     } catch (err: any) {
       console.error("Super Admin login error:", err);
-      setLoginError("अनपेक्षित सर्व्हर त्रुटी आली.");
+      setLoginError("Unexpected server error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -285,7 +286,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           <button
             onClick={onClose}
             className="absolute right-4 top-4 p-1.5 rounded-full text-amber-200/80 hover:text-white hover:bg-white/10 transition"
-            title="बंद करा"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -298,10 +299,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
             <div>
               <span className="text-amber-400 text-[11px] font-semibold tracking-wider block">
-                जय संताजी
+                MPTM Dashboard
               </span>
               <h2 className="text-lg font-bold text-white leading-tight">
-                डॅशबोर्ड लॉगिन (Dashboard Sign in)
+                Dashboard Sign in
               </h2>
             </div>
           </div>
@@ -361,12 +362,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 <form onSubmit={handleSendOtpCode} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                      इमेल आयडी (Registered Email Address) <span className="text-red-500">*</span>
+                      Registered Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
                       required
-                      placeholder="उदा. user@example.com"
+                      placeholder="e.g. user@example.com"
                       value={userEmailInput}
                       onChange={(e) => setUserEmailInput(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition font-mono"
@@ -374,7 +375,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   </div>
 
                   <p className="text-[11px] text-slate-500">
-                    * केवळ मुख्य प्रशासकाने (Super Admin) नोंदणी केलेल्या इमेलवरच पडताळणी कोड पाठवला जाईल.
+                    * Verification code will only be sent to registered emails.
                   </p>
 
                   <button
@@ -385,12 +386,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>कोड पाठवत आहे...</span>
+                        <span>Sending code...</span>
                       </>
                     ) : (
                       <>
                         <Send className="w-4 h-4" />
-                        <span>पडताळणी कोड पाठवा (Send OTP)</span>
+                        <span>Send Verification Code</span>
                       </>
                     )}
                   </button>
@@ -413,7 +414,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       }}
                       className="text-[11px] font-bold text-blue-700 underline hover:text-blue-900 shrink-0 ml-2"
                     >
-                      इमेल बदला
+                      Change Email
                     </button>
                   </div>
 
@@ -426,7 +427,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-2">
-                      ६-अंकी पडताळणी कोड (Enter 6-Digit OTP Code) <span className="text-red-500">*</span>
+                      Enter 6-Digit OTP Code <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                       {otpDigits.map((digit, idx) => (
@@ -458,12 +459,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     {isLoading ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                        <span>सत्यप्रमाणित होत आहे...</span>
+                        <span>Verifying...</span>
                       </>
                     ) : (
                       <>
                         <ShieldCheck className="w-4 h-4" />
-                        <span>सत्यप्रमाणित करा व लॉगिन करा (Verify & Login)</span>
+                        <span>Verify & Sign in</span>
                       </>
                     )}
                   </button>
@@ -506,7 +507,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
-                    title={showPassword ? "पासवर्ड लपवा" : "पासवर्ड दाखवा"}
+                    title={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -521,7 +522,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 {isLoading ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                    <span>लॉगिन होत आहे...</span>
+                    <span>Signing in...</span>
                   </>
                 ) : (
                   <>
@@ -533,19 +534,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </form>
           )}
 
-          {/* Footer Link to Direct Admin Login Page */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>किंवा डॅशबोर्ड लॉगिन पेजवर जा:</span>
-            <a
-              href={`${ADMIN_URL}/login`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-amber-700 hover:text-amber-900 underline flex items-center gap-1"
-            >
-              <span>Admin Login Page</span>
-              <span>&rarr;</span>
-            </a>
-          </div>
+        </div>
+
+        {/* Colorful Bottom Strip */}
+        <div className="h-1.5 w-full flex">
+          <div className="flex-1 bg-[#FFB800]" />
+          <div className="flex-1 bg-[#1B66C9]" />
+          <div className="flex-1 bg-[#E53935]" />
         </div>
       </div>
     </div>

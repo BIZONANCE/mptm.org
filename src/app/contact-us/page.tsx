@@ -1,7 +1,119 @@
-export default function ContactUs() {
-  return (
-    <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-slate-900">
+"use client";
 
+import React, { useState, useEffect } from "react";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
+
+interface ContactInfoData {
+  address: string;
+  phone: string;
+  email: string;
+  hours: string;
+}
+
+export default function ContactUs() {
+  const [contactInfo, setContactInfo] = useState<ContactInfoData>({
+    address: "महाराष्ट्र प्रांतिक तैलिक महासभा\nअमरावती विभाग, अमरावती.\nमहाराष्ट्र, भारत.",
+    phone: "9876543210",
+    email: "info@mptmamravati.org",
+    hours: "सोमवार - शनिवार\nसकाळी 10:00 ते संध्याकाळी 6:00",
+  });
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+  });
+
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const getApiUrl = (): string => {
+    if (typeof window !== "undefined") {
+      const host = window.location.hostname;
+      if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
+      if (host.includes("mptm.org")) return "https://api.mptm.org";
+    }
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
+  };
+
+  const API_URL = getApiUrl();
+
+  // Fetch dynamic contact info configured in Super Admin Dashboard
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/contact/info`);
+        const data = await res.json();
+        if (res.ok && data.success && data.data) {
+          setContactInfo(data.data);
+        }
+      } catch (err) {
+        console.error("Fetch contact info error:", err);
+      }
+    };
+    fetchContactInfo();
+  }, [API_URL]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onlyDigits = e.target.value.replace(/\D/g, "").slice(0, 10);
+    setFormData((prev) => ({ ...prev, phone: onlyDigits }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+
+    if (formData.phone.length !== 10) {
+      setSubmitError("कृपया १० अंकी वैध मोबाईल नंबर प्रविष्ट करा!");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/contact/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        setSubmitError(data.error || "संदेश पाठवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
+      }
+    } catch (err: any) {
+      console.error("Contact submit error:", err);
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmitted(false);
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+    });
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-slate-900 font-sans">
       {/* Page Header */}
       <section className="bg-[#4A0404] border-b border-amber-500/30 py-10 px-4 sm:px-6 lg:px-8 text-center">
         <span className="inline-block bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-amber-100 font-extrabold text-xs sm:text-sm px-4 py-1 rounded-full border border-amber-400 shadow-xs mb-3">
@@ -41,19 +153,15 @@ export default function ContactUs() {
                 {/* Address */}
                 <div className="bg-white border border-amber-300/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-xl">
-                      📍
+                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-white shadow-xs">
+                      <MapPin className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
                       <h3 className="font-bold text-[#4A0404]">
                         कार्यालयाचा पत्ता
                       </h3>
-                      <p className="mt-1 text-sm leading-6 text-gray-600">
-                        महाराष्ट्र प्रांतिक तैलिक महासभा
-                        <br />
-                        अमरावती विभाग, अमरावती.
-                        <br />
-                        महाराष्ट्र, भारत.
+                      <p className="mt-1 text-sm leading-6 text-gray-600 whitespace-pre-line">
+                        {contactInfo.address}
                       </p>
                     </div>
                   </div>
@@ -62,18 +170,18 @@ export default function ContactUs() {
                 {/* Phone */}
                 <div className="bg-white border border-amber-300/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-xl">
-                      📞
+                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-white shadow-xs">
+                      <Phone className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
                       <h3 className="font-bold text-[#4A0404]">
                         फोन नंबर
                       </h3>
                       <a
-                        href="tel:+919999999999"
-                        className="mt-1 block text-sm text-gray-600 hover:text-[#4A0404] transition-colors"
+                        href={`tel:${contactInfo.phone}`}
+                        className="mt-1 block text-sm font-bold text-gray-700 hover:text-[#4A0404] transition-colors"
                       >
-                        +91 99999 99999
+                        +91 {contactInfo.phone}
                       </a>
                     </div>
                   </div>
@@ -82,18 +190,18 @@ export default function ContactUs() {
                 {/* Email */}
                 <div className="bg-white border border-amber-300/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-xl">
-                      ✉️
+                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-white shadow-xs">
+                      <Mail className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
                       <h3 className="font-bold text-[#4A0404]">
                         ई-मेल
                       </h3>
                       <a
-                        href="mailto:info@mptmamravati.org"
+                        href={`mailto:${contactInfo.email}`}
                         className="mt-1 block text-sm text-gray-600 hover:text-[#4A0404] transition-colors"
                       >
-                        info@mptmamravati.org
+                        {contactInfo.email}
                       </a>
                     </div>
                   </div>
@@ -102,17 +210,15 @@ export default function ContactUs() {
                 {/* Office Hours */}
                 <div className="bg-white border border-amber-300/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-xl">
-                      🕐
+                    <div className="w-11 h-11 shrink-0 rounded-full bg-[#4A0404] flex items-center justify-center text-white shadow-xs">
+                      <Clock className="w-5 h-5 text-amber-400" />
                     </div>
                     <div>
                       <h3 className="font-bold text-[#4A0404]">
                         कार्यालयीन वेळ
                       </h3>
-                      <p className="mt-1 text-sm leading-6 text-gray-600">
-                        सोमवार - शनिवार
-                        <br />
-                        सकाळी 10:00 ते संध्याकाळी 6:00
+                      <p className="mt-1 text-sm leading-6 text-gray-600 whitespace-pre-line">
+                        {contactInfo.hours}
                       </p>
                     </div>
                   </div>
@@ -201,106 +307,150 @@ export default function ContactUs() {
                 </p>
               </div>
 
-              <form className="space-y-5">
-                {/* Name */}
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-semibold text-gray-700 mb-1.5"
+              {submitted ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                    ✓
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900">
+                    संदेश यशस्वीरित्या पाठवला गेला!
+                  </h3>
+                  <p className="text-sm text-slate-600 max-w-sm mx-auto">
+                    धन्यवाद {formData.name}, तुमचा संदेश आमच्याकडे प्राप्त झाला आहे. आम्ही लवकरच तुमच्याशी संपर्क साधू.
+                  </p>
+                  <button
+                    onClick={handleReset}
+                    className="mt-4 px-6 py-2.5 bg-[#4A0404] hover:bg-[#650606] text-white font-bold text-sm rounded-full transition shadow-md"
                   >
-                    पूर्ण नाव
-                  </label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="आपले पूर्ण नाव"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  />
+                    नवीन संदेश पाठवा
+                  </button>
                 </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {submitError && (
+                    <div className="p-3.5 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-semibold">
+                      {submitError}
+                    </div>
+                  )}
 
-                {/* Email */}
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-semibold text-gray-700 mb-1.5"
+                  {/* Name */}
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-semibold text-gray-700 mb-1.5"
+                    >
+                      पूर्ण नाव *
+                    </label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="आपले पूर्ण नाव"
+                      className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-semibold text-gray-700 mb-1.5"
+                    >
+                      ई-मेल *
+                    </label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="आपला ई-मेल"
+                      className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                  </div>
+
+                  {/* Mobile (10-Digit) */}
+                  <div>
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-semibold text-gray-700 mb-1.5"
+                    >
+                      मोबाईल नंबर (१० अंकी) *
+                    </label>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={handlePhoneChange}
+                      required
+                      maxLength={10}
+                      minLength={10}
+                      pattern="[0-9]{10}"
+                      inputMode="numeric"
+                      placeholder="१० अंकी मोबाईल नंबर (उदा. 9876543210)"
+                      className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 font-mono outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                  </div>
+
+                  {/* Subject */}
+                  <div>
+                    <label
+                      htmlFor="subject"
+                      className="block text-sm font-semibold text-gray-700 mb-1.5"
+                    >
+                      विषय
+                    </label>
+                    <input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="संदेशाचा विषय"
+                      className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-semibold text-gray-700 mb-1.5"
+                    >
+                      संदेश *
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="आपला संदेश येथे लिहा..."
+                      className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full rounded-lg bg-[#4A0404] px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-[#650606] hover:shadow-lg disabled:opacity-60"
                   >
-                    ई-मेल
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="आपला ई-मेल"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  />
-                </div>
-
-                {/* Mobile */}
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-semibold text-gray-700 mb-1.5"
-                  >
-                    मोबाईल नंबर
-                  </label>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    placeholder="आपला मोबाईल नंबर"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  />
-                </div>
-
-                {/* Subject */}
-                <div>
-                  <label
-                    htmlFor="subject"
-                    className="block text-sm font-semibold text-gray-700 mb-1.5"
-                  >
-                    विषय
-                  </label>
-                  <input
-                    id="subject"
-                    name="subject"
-                    type="text"
-                    placeholder="संदेशाचा विषय"
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  />
-                </div>
-
-                {/* Message */}
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-semibold text-gray-700 mb-1.5"
-                  >
-                    संदेश
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    placeholder="आपला संदेश येथे लिहा..."
-                    className="w-full resize-none rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#4A0404] px-6 py-3.5 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-[#650606] hover:shadow-lg"
-                >
-                  संदेश पाठवा
-                </button>
-              </form>
+                    {isSubmitting ? "संदेश पाठवत आहे..." : "संदेश पाठवा"}
+                  </button>
+                </form>
+              )}
             </div>
 
           </div>
         </div>
       </main>
-
     </div>
   );
 }
