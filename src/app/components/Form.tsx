@@ -144,10 +144,23 @@ function formatDateToDDMMYYYY(dateInput: string | Date | null | undefined): stri
     return str;
 }
 
+function extractYear(dateStr?: string): number {
+    if (!dateStr) return new Date().getFullYear();
+    const str = dateStr.trim();
+    const match = str.match(/\b(20\d{2}|19\d{2})\b/);
+    if (match) {
+        return parseInt(match[1], 10);
+    }
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+        return d.getFullYear();
+    }
+    return new Date().getFullYear();
+}
+
 function formatReceiptNo(seq: number, dateStr?: string): string {
-    const year = dateStr ? new Date(dateStr).getFullYear() : new Date().getFullYear();
-    const validYear = isNaN(year) ? new Date().getFullYear() : year;
-    return `MPTM-${validYear}-AMT-R${String(seq).padStart(3, "0")}`;
+    const year = extractYear(dateStr);
+    return `MPTM-${year}-AMT-R${String(seq).padStart(3, "0")}`;
 }
 
 export default function Form() {
@@ -158,9 +171,8 @@ export default function Form() {
     const [receiptSeq, setReceiptSeq] = useState(1);
 
     const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq, dateStr?: string) => {
-        const year = dateStr ? new Date(dateStr).getFullYear() : new Date().getFullYear();
-        const validYear = isNaN(year) ? new Date().getFullYear() : year;
-        return `MPTM-${validYear}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+        const year = extractYear(dateStr);
+        return `MPTM-${year}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
     };
 
     // Referral link tracking
@@ -190,7 +202,7 @@ export default function Form() {
 
     const [formData, setFormData] = useState({
         receiptNo: formatReceiptNo(1),
-        date: new Date().toISOString().split("T")[0],
+        date: formatDateToDDMMYYYY(new Date()),
         registrationFee: initialFee.toString(),
         address: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
@@ -376,6 +388,17 @@ export default function Form() {
         }
     };
 
+    const handleFeeBlur = () => {
+        const feeNum = parseInt(formData.registrationFee, 10);
+        if (isNaN(feeNum) || feeNum < 101) {
+            setFormData((prev) => ({
+                ...prev,
+                registrationFee: "101",
+                amountInWords: convertNumberToMarathiWords("101"),
+            }));
+        }
+    };
+
     const handleMainMemberChange = (
         index: number,
         field: keyof MainMember,
@@ -484,8 +507,9 @@ export default function Form() {
             return false;
         }
 
-        if (!formData.registrationFee || formData.registrationFee.trim() === "" || parseInt(formData.registrationFee, 10) <= 0) {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
+        const feeNum = parseInt(formData.registrationFee, 10);
+        if (!formData.registrationFee || formData.registrationFee.trim() === "" || isNaN(feeNum) || feeNum < 101) {
+            setScreenshotError("⚠️ नोंदणी शुल्क/देय रक्कम ₹101 पेक्षा कमी असू शकत नाही!");
             return false;
         }
 
@@ -580,7 +604,7 @@ export default function Form() {
                 setTimeout(async () => {
                     setFormData({
                         receiptNo: formatReceiptNo(receiptSeq + 1),
-                        date: new Date().toISOString().split("T")[0],
+                        date: formatDateToDDMMYYYY(new Date()),
                         registrationFee: "101",
                         address: "",
                         amountInWords: "एकशे एक रुपये फक्त",
@@ -696,10 +720,11 @@ export default function Form() {
                                                     दिनांक :
                                                 </label>
                                                 <input
-                                                    type="date"
+                                                    type="text"
                                                     name="date"
                                                     value={formData.date}
                                                     onChange={handleChange}
+                                                    placeholder="DD/MM/YYYY"
                                                     required
                                                     className={inputBase}
                                                 />
@@ -715,6 +740,7 @@ export default function Form() {
                                                     name="registrationFee"
                                                     value={formData.registrationFee}
                                                     onChange={handleChange}
+                                                    onBlur={handleFeeBlur}
                                                     required
                                                     className={`${inputBase} font-extrabold text-[#7A0C0C]`}
                                                 />
