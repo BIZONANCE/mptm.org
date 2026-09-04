@@ -723,10 +723,8 @@ export default function Form() {
                                                     type="text"
                                                     name="date"
                                                     value={formData.date}
-                                                    onChange={handleChange}
-                                                    placeholder="DD/MM/YYYY"
-                                                    required
-                                                    className={inputBase}
+                                                    readOnly
+                                                    className={inputReadOnly}
                                                 />
                                             </div>
 
