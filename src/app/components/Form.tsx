@@ -764,114 +764,117 @@ export default function Form() {
                                                 </button>
                                             </div>
 
-                                            {mainMembers.map((member, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="p-3 sm:p-4 rounded-xl bg-white border-2 border-amber-700/30 shadow-xs relative space-y-3 print:p-2.5 print:space-y-2"
-                                                >
-                                                    <div className="flex items-center justify-between border-b border-stone-200 pb-1.5 print:pb-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="w-5 h-5 rounded-full bg-[#7A0C0C] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
-                                                                {member.srNo}
-                                                            </span>
-                                                            <h4 className="font-bold text-stone-900 text-sm sm:text-base">
-                                                                {getMemberTitle(member.srNo)} माहिती
-                                                            </h4>
+                                            {/* Single Container Box for Main Member(s) & Address */}
+                                            <div className="p-3 sm:p-4 rounded-xl bg-white border-2 border-amber-700/30 shadow-xs space-y-4 print:p-2.5 print:space-y-3">
+                                                {mainMembers.map((member, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`space-y-3 print:space-y-2 ${index > 0 ? "pt-3.5 border-t-2 border-dashed border-amber-300/80" : ""}`}
+                                                    >
+                                                        <div className="flex items-center justify-between border-b border-stone-200 pb-1.5 print:pb-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="w-5 h-5 rounded-full bg-[#7A0C0C] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                                                    {member.srNo}
+                                                                </span>
+                                                                <h4 className="font-bold text-stone-900 text-sm sm:text-base">
+                                                                    {getMemberTitle(member.srNo)} माहिती
+                                                                </h4>
+                                                            </div>
+
+                                                            {mainMembers.length > 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => deleteMainMember(index)}
+                                                                    className="min-h-[36px] text-xs font-bold text-red-600 hover:text-white hover:bg-red-700 active:bg-red-700 px-2.5 py-1.5 rounded-lg border border-red-300 transition-all flex items-center gap-1 print:hidden"
+                                                                >
+                                                                    <span>🗑️ हटवा</span>
+                                                                </button>
+                                                            )}
                                                         </div>
 
-                                                        {mainMembers.length > 1 && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => deleteMainMember(index)}
-                                                                className="min-h-[36px] text-xs font-bold text-red-600 hover:text-white hover:bg-red-700 active:bg-red-700 px-2.5 py-1.5 rounded-lg border border-red-300 transition-all flex items-center gap-1 print:hidden"
-                                                            >
-                                                                <span>🗑️ हटवा</span>
-                                                            </button>
-                                                        )}
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 print:gap-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                    {getMemberOrdinalLabel(member.srNo)} :
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={member.memberNo}
+                                                                    readOnly
+                                                                    className={inputReadOnly}
+                                                                />
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="font-bold text-red-700 whitespace-nowrap text-xs sm:text-sm">
+                                                                    प्रभाग क्रमांक :
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={member.prabhagNo}
+                                                                    onChange={(e) =>
+                                                                        handleMainMemberChange(index, "prabhagNo", e.target.value)
+                                                                    }
+                                                                    placeholder="प्रभाग किंवा वॉर्ड क्रमांक"
+                                                                    className={inputBase}
+                                                                />
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                    सदस्याचे पूर्णनाव :
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={member.fullName}
+                                                                    onChange={(e) =>
+                                                                        handleMainMemberChange(index, "fullName", e.target.value)
+                                                                    }
+                                                                    required
+                                                                    placeholder="मुख्य सदस्याचे पूर्ण नाव"
+                                                                    className={inputBase}
+                                                                />
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                    मोबाईल क्रमांक :
+                                                                </label>
+                                                                <input
+                                                                    type="tel"
+                                                                    value={member.mobileNo}
+                                                                    onChange={(e) => {
+                                                                        const cleanVal = e.target.value.replace(/\D/g, "").slice(0, 10);
+                                                                        handleMainMemberChange(index, "mobileNo", cleanVal);
+                                                                    }}
+                                                                    required
+                                                                    maxLength={10}
+                                                                    pattern="[0-9]{10}"
+                                                                    inputMode="numeric"
+                                                                    placeholder="१० अंकी मोबाईल नंबर"
+                                                                    className={inputBase}
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     </div>
+                                                ))}
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 print:gap-2">
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                {getMemberOrdinalLabel(member.srNo)} :
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={member.memberNo}
-                                                                readOnly
-                                                                className={inputReadOnly}
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="font-bold text-red-700 whitespace-nowrap text-xs sm:text-sm">
-                                                                प्रभाग क्रमांक :
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={member.prabhagNo}
-                                                                onChange={(e) =>
-                                                                    handleMainMemberChange(index, "prabhagNo", e.target.value)
-                                                                }
-                                                                placeholder="प्रभाग किंवा वॉर्ड क्रमांक"
-                                                                className={inputBase}
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                सदस्याचे पूर्णनाव :
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={member.fullName}
-                                                                onChange={(e) =>
-                                                                    handleMainMemberChange(index, "fullName", e.target.value)
-                                                                }
-                                                                required
-                                                                placeholder="मुख्य सदस्याचे पूर्ण नाव"
-                                                                className={inputBase}
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                मोबाईल क्रमांक :
-                                                            </label>
-                                                            <input
-                                                                type="tel"
-                                                                value={member.mobileNo}
-                                                                onChange={(e) => {
-                                                                    const cleanVal = e.target.value.replace(/\D/g, "").slice(0, 10);
-                                                                    handleMainMemberChange(index, "mobileNo", cleanVal);
-                                                                }}
-                                                                required
-                                                                maxLength={10}
-                                                                pattern="[0-9]{10}"
-                                                                inputMode="numeric"
-                                                                placeholder="१० अंकी मोबाईल नंबर"
-                                                                className={inputBase}
-                                                            />
-                                                        </div>
-                                                    </div>
+                                                {/* Common Address Field inside the bottom of the single container box */}
+                                                <div className="flex items-center gap-2 pt-3 border-t-2 border-amber-200">
+                                                    <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                        पत्ता :
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        name="address"
+                                                        value={formData.address}
+                                                        onChange={handleChange}
+                                                        required
+                                                        placeholder="रहिवासी पत्ता प्रविष्ट करा"
+                                                        className={inputBase}
+                                                    />
                                                 </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Common Address Field */}
-                                        <div className="flex items-center gap-2">
-                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                पत्ता :
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="address"
-                                                value={formData.address}
-                                                onChange={handleChange}
-                                                required
-                                                placeholder="रहिवासी पत्ता प्रविष्ट करा"
-                                                className={inputBase}
-                                            />
+                                            </div>
                                         </div>
 
                                         {/* FAMILY MEMBERS SECTION */}

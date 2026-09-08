@@ -4,12 +4,10 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
-import LoginModal from "./LoginModal";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const navLinks = [
     { href: "/", label: "मुख्यपृष्ठ" },
@@ -82,15 +80,24 @@ export default function Navbar() {
                 सदस्य नोंदणी
               </Link>
 
-              {/* Login Button - Triggers Login Modal */}
-              <button
-                type="button"
-                onClick={() => setIsLoginModalOpen(true)}
+              {/* Donation button - Donation */}
+              <Link
+                href="/donation"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-emerald-400/80 shadow-sm hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
+              >
+                <span>Donation</span>
+              </Link>
+
+              {/* Login Button - Direct link to Admin portal */}
+              <a
+                href="https://admin.mptmamravati.org"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-amber-400/50 shadow-sm hover:border-amber-400 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0 cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5 text-amber-400" />
                 <span>लॉगिन</span>
-              </button>
+              </a>
             </div>
           </div>
 
@@ -136,31 +143,31 @@ export default function Navbar() {
               <Link
                 href="/registration"
                 onClick={() => setIsOpen(false)}
-                className="flex-1 text-center bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-amber-300 shadow-sm hover:from-amber-500 hover:to-amber-600 transition-all"
+                className="flex-1 text-center bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-amber-300 shadow-sm hover:from-amber-500 hover:to-amber-600 transition-all whitespace-nowrap"
               >
                 सदस्य नोंदणी
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsLoginModalOpen(true);
-                }}
-                className="flex-1 text-center inline-flex items-center justify-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-amber-400/50 transition-all cursor-pointer"
+              <Link
+                href="/donation"
+                onClick={() => setIsOpen(false)}
+                className="flex-1 text-center inline-flex items-center justify-center bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-700 text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-emerald-400 shadow-sm transition-all whitespace-nowrap"
+              >
+                <span>Donation</span>
+              </Link>
+              <a
+                href="https://admin.mptmamravati.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex-1 text-center inline-flex items-center justify-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-amber-400/50 transition-all cursor-pointer whitespace-nowrap"
               >
                 <LogIn className="w-3.5 h-3.5 text-amber-400" />
                 <span>लॉगिन</span>
-              </button>
+              </a>
             </div>
           </nav>
         </div>
       </header>
-
-      {/* Embedded Login Modal */}
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-      />
     </>
   );
-}
+}
