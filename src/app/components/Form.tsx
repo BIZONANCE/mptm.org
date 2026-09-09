@@ -200,6 +200,8 @@ export default function Form() {
 
     const initialFee = DEFAULT_BASE_FEE * 1; // ₹101 by default
 
+    const [membershipType, setMembershipType] = useState<"PRIMARY" | "EXECUTIVE">("PRIMARY");
+
     const [formData, setFormData] = useState({
         receiptNo: formatReceiptNo(1),
         date: formatDateToDDMMYYYY(new Date()),
@@ -209,6 +211,16 @@ export default function Form() {
         paymentMethod: "UPI",
         otherPaymentMethod: "",
     });
+
+    const handleMembershipTypeChange = (type: "PRIMARY" | "EXECUTIVE") => {
+        setMembershipType(type);
+        const fee = type === "EXECUTIVE" ? 1001 : 101 * mainMembers.length;
+        setFormData((prev) => ({
+            ...prev,
+            registrationFee: fee.toString(),
+            amountInWords: convertNumberToMarathiWords(fee.toString()),
+        }));
+    };
 
     // Ensure payment method defaults to UPI if cash is disabled (no referral link)
     useEffect(() => {
@@ -699,6 +711,40 @@ export default function Form() {
                                 <td className="p-0 border-none">
                                     {/* Receipt Body */}
                                     <div className="p-3 sm:p-6 space-y-4 text-stone-900 print:p-4 print:space-y-3">
+
+                                        {/* Membership Type Selection */}
+                                        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100/80 via-amber-50 to-amber-100/80 border border-amber-300 print:hidden space-y-2">
+                                            <label className="font-extrabold text-[#7A0C0C] text-xs sm:text-sm block">
+                                                ❖ नोंदणी प्रकार निवडा (Select Membership Type) :
+                                            </label>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMembershipTypeChange("PRIMARY")}
+                                                    className={`py-2 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-between cursor-pointer ${
+                                                        membershipType === "PRIMARY"
+                                                            ? "bg-gradient-to-r from-amber-800 to-amber-900 text-amber-100 border-amber-400 shadow-md font-extrabold"
+                                                            : "bg-white text-stone-800 border-stone-300 hover:bg-amber-50"
+                                                    }`}
+                                                >
+                                                    <span>प्राथमिक सदस्य नोंदणी</span>
+                                                    <span className="bg-amber-200/90 text-amber-950 text-xs px-2 py-0.5 rounded-full font-black">₹ १०१/-</span>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMembershipTypeChange("EXECUTIVE")}
+                                                    className={`py-2 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-between cursor-pointer ${
+                                                        membershipType === "EXECUTIVE"
+                                                            ? "bg-gradient-to-r from-[#7A0C0C] via-[#9E1010] to-[#7A0C0C] text-amber-200 border-amber-400 shadow-md font-extrabold"
+                                                            : "bg-white text-stone-800 border-stone-300 hover:bg-amber-50"
+                                                    }`}
+                                                >
+                                                    <span>कार्यकारिणी सदस्य नोंदणी</span>
+                                                    <span className="bg-amber-300 text-amber-950 text-xs px-2 py-0.5 rounded-full font-black">₹ १००१/-</span>
+                                                </button>
+                                            </div>
+                                        </div>
 
                                         {/* Top Row: Receipt No, Date, & Total Registration Fee */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 rounded-xl bg-amber-50/60 border border-amber-300/60 print:p-2 print:gap-3">

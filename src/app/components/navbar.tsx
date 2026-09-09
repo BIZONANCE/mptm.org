@@ -12,6 +12,7 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "मुख्यपृष्ठ" },
     { href: "/about-us", label: "आमच्याबद्दल" },
+    { href: "/executives", label: "कार्यकारिणी" },
     { href: "/career", label: "करिअर" },
     { href: "/management", label: "व्यवस्थापन" },
     { href: "/contact-us", label: "संपर्क करा" },
