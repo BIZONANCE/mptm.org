@@ -158,35 +158,67 @@ function extractYear(dateStr?: string): number {
     return new Date().getFullYear();
 }
 
-function formatReceiptNo(seq: number, dateStr?: string): string {
+function formatReceiptNo(seq: number, dateStr?: string, isExec: boolean = false): string {
+    if (isExec) {
+        return `MPTM-EM-R${String(seq).padStart(3, "0")}`;
+    }
     const year = extractYear(dateStr);
     return `MPTM-${year}-AMT-R${String(seq).padStart(3, "0")}`;
 }
 
-export default function Form() {
+interface FormProps {
+    initialMembershipType?: "PRIMARY" | "EXECUTIVE";
+}
+
+export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = {}) {
     const DEFAULT_BASE_FEE = 101;
-    const FULL_SANDESH_MESSAGE = "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या प्राथमिक सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली.";
+    const getFullSandeshMessage = (type: "PRIMARY" | "EXECUTIVE") =>
+        type === "EXECUTIVE"
+            ? "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या कार्यकारिणी सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली."
+            : "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या प्राथमिक सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली.";
 
     const [baseMemberSeq, setBaseMemberSeq] = useState(1);
     const [receiptSeq, setReceiptSeq] = useState(1);
 
+    // Referral link tracking & initial membership type handling
+    const [referredBy, setReferredBy] = useState<string>("");
+    const [membershipType, setMembershipType] = useState<"PRIMARY" | "EXECUTIVE">(initialMembershipType);
+
     const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq, dateStr?: string) => {
+        if (membershipType === "EXECUTIVE") {
+            return `MPTM-EM-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
+        }
         const year = extractYear(dateStr);
         return `MPTM-${year}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
     };
-
-    // Referral link tracking
-    const [referredBy, setReferredBy] = useState<string>("");
 
     useEffect(() => {
         if (typeof window !== "undefined") {
             const params = new URLSearchParams(window.location.search);
             const refParam = params.get("ref");
+            const typeParam = params.get("type");
+            
             if (refParam && refParam.trim()) {
                 setReferredBy(refParam.trim());
             }
+
+            if (initialMembershipType === "EXECUTIVE" || typeParam === "EXECUTIVE" || typeParam === "EXECUTIVE_MEMBER") {
+                setMembershipType("EXECUTIVE");
+                setFormData((prev) => ({
+                    ...prev,
+                    receiptNo: formatReceiptNo(receiptSeq, prev.date, true),
+                    registrationFee: "1001",
+                    amountInWords: convertNumberToMarathiWords("1001"),
+                }));
+                setMainMembers((prev) =>
+                    prev.map((m, idx) => ({
+                        ...m,
+                        memberNo: `MPTM-EM-S${String(baseMemberSeq + idx).padStart(3, "0")}`,
+                    }))
+                );
+            }
         }
-    }, []);
+    }, [initialMembershipType, receiptSeq, baseMemberSeq]);
 
     // Main Members list (Default 1 Main Member)
     const [mainMembers, setMainMembers] = useState<MainMember[]>([
@@ -198,9 +230,7 @@ export default function Form() {
         { srNo: 1, name: "", relation: "", dob: "", occupation: "", mobile: "" },
     ]);
 
-    const initialFee = DEFAULT_BASE_FEE * 1; // ₹101 by default
-
-    const [membershipType, setMembershipType] = useState<"PRIMARY" | "EXECUTIVE">("PRIMARY");
+    const initialFee = membershipType === "EXECUTIVE" ? 1001 : DEFAULT_BASE_FEE * 1;
 
     const [formData, setFormData] = useState({
         receiptNo: formatReceiptNo(1),
@@ -217,9 +247,16 @@ export default function Form() {
         const fee = type === "EXECUTIVE" ? 1001 : 101 * mainMembers.length;
         setFormData((prev) => ({
             ...prev,
+            receiptNo: formatReceiptNo(receiptSeq, prev.date, type === "EXECUTIVE"),
             registrationFee: fee.toString(),
             amountInWords: convertNumberToMarathiWords(fee.toString()),
         }));
+        setMainMembers((prev) =>
+            prev.map((m, idx) => ({
+                ...m,
+                memberNo: formatMemberNo(idx + 1, baseMemberSeq, formData.date),
+            }))
+        );
     };
 
     // Ensure payment method defaults to UPI if cash is disabled (no referral link)
@@ -309,7 +346,7 @@ export default function Form() {
                 setBaseMemberSeq(mSeq);
                 setFormData((prev) => ({
                     ...prev,
-                    receiptNo: formatReceiptNo(rSeq, prev.date),
+                    receiptNo: formatReceiptNo(rSeq, prev.date, membershipType === "EXECUTIVE"),
                 }));
                 setMainMembers((prev) =>
                     prev.map((m, idx) => ({
@@ -329,12 +366,13 @@ export default function Form() {
 
     // Typing transition effect for Sandesh (संदेश) message
     useEffect(() => {
+        const fullMessage = getFullSandeshMessage(membershipType);
         if (isPaymentVerified) {
             setTypedMessage("");
             let idx = 0;
             const interval = setInterval(() => {
-                if (idx < FULL_SANDESH_MESSAGE.length) {
-                    setTypedMessage(FULL_SANDESH_MESSAGE.slice(0, idx + 1));
+                if (idx < fullMessage.length) {
+                    setTypedMessage(fullMessage.slice(0, idx + 1));
                     idx++;
                 } else {
                     clearInterval(interval);
@@ -345,7 +383,7 @@ export default function Form() {
         } else {
             setTypedMessage("");
         }
-    }, [isPaymentVerified, paymentScreenshot, formData.paymentMethod]);
+    }, [isPaymentVerified, paymentScreenshot, formData.paymentMethod, membershipType]);
 
     const getRatePerMember = (currentFeeStr: string, memberCount: number) => {
         const currentNum = parseInt(currentFeeStr, 10);
@@ -712,39 +750,14 @@ export default function Form() {
                                     {/* Receipt Body */}
                                     <div className="p-3 sm:p-6 space-y-4 text-stone-900 print:p-4 print:space-y-3">
 
-                                        {/* Membership Type Selection */}
-                                        <div className="p-3 rounded-xl bg-gradient-to-r from-amber-100/80 via-amber-50 to-amber-100/80 border border-amber-300 print:hidden space-y-2">
-                                            <label className="font-extrabold text-[#7A0C0C] text-xs sm:text-sm block">
-                                                ❖ नोंदणी प्रकार निवडा (Select Membership Type) :
-                                            </label>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleMembershipTypeChange("PRIMARY")}
-                                                    className={`py-2 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-between cursor-pointer ${
-                                                        membershipType === "PRIMARY"
-                                                            ? "bg-gradient-to-r from-amber-800 to-amber-900 text-amber-100 border-amber-400 shadow-md font-extrabold"
-                                                            : "bg-white text-stone-800 border-stone-300 hover:bg-amber-50"
-                                                    }`}
-                                                >
-                                                    <span>प्राथमिक सदस्य नोंदणी</span>
-                                                    <span className="bg-amber-200/90 text-amber-950 text-xs px-2 py-0.5 rounded-full font-black">₹ १०१/-</span>
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleMembershipTypeChange("EXECUTIVE")}
-                                                    className={`py-2 px-4 rounded-xl font-bold text-xs sm:text-sm border transition-all flex items-center justify-between cursor-pointer ${
-                                                        membershipType === "EXECUTIVE"
-                                                            ? "bg-gradient-to-r from-[#7A0C0C] via-[#9E1010] to-[#7A0C0C] text-amber-200 border-amber-400 shadow-md font-extrabold"
-                                                            : "bg-white text-stone-800 border-stone-300 hover:bg-amber-50"
-                                                    }`}
-                                                >
-                                                    <span>कार्यकारिणी सदस्य नोंदणी</span>
-                                                    <span className="bg-amber-300 text-amber-950 text-xs px-2 py-0.5 rounded-full font-black">₹ १००१/-</span>
-                                                </button>
+                                        {/* Header Badge in Body / Title indicator */}
+                                        {membershipType === "EXECUTIVE" && (
+                                            <div className="p-2.5 rounded-xl bg-gradient-to-r from-[#7A0C0C]/10 via-amber-100/60 to-[#7A0C0C]/10 border border-amber-400 text-center">
+                                                <span className="font-extrabold text-[#7A0C0C] text-xs sm:text-sm">
+                                                    ★ कार्यकारिणी सदस्य ऑनलाईन नोंदणी फॉर्म
+                                                </span>
                                             </div>
-                                        </div>
+                                        )}
 
                                         {/* Top Row: Receipt No, Date, & Total Registration Fee */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 rounded-xl bg-amber-50/60 border border-amber-300/60 print:p-2 print:gap-3">
@@ -1177,11 +1190,10 @@ export default function Form() {
                                                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-stone-900 font-semibold text-sm sm:text-sm">
                                                         {/* Cash ("रोख") Radio Input - Only enabled when accessed via user referral link */}
                                                         <label
-                                                            className={`flex items-center gap-1.5 min-h-[36px] ${
-                                                                referredBy
+                                                            className={`flex items-center gap-1.5 min-h-[36px] ${referredBy
                                                                     ? "cursor-pointer text-stone-900"
                                                                     : "cursor-not-allowed opacity-50 text-stone-500"
-                                                            }`}
+                                                                }`}
                                                             title={
                                                                 referredBy
                                                                     ? "रोख देयक निवडा"
@@ -1195,9 +1207,8 @@ export default function Form() {
                                                                 checked={formData.paymentMethod === "रोख"}
                                                                 onChange={handleChange}
                                                                 disabled={!referredBy}
-                                                                className={`w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 ${
-                                                                    referredBy ? "cursor-pointer" : "cursor-not-allowed"
-                                                                }`}
+                                                                className={`w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 ${referredBy ? "cursor-pointer" : "cursor-not-allowed"
+                                                                    }`}
                                                             />
                                                             <span>रोख</span>
                                                         </label>
@@ -1266,12 +1277,11 @@ export default function Form() {
                                                         <span>📲</span>
                                                         <span>PhonePe / UPI द्वारे QR कोड स्कॅन करून ऑनलाईन पेमेंट करा</span>
                                                     </p>
-                                                    <div className="relative w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-white p-2 rounded-2xl border-2 border-amber-300 shadow-md">
-                                                        <Image
+                                                    <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-white p-2 rounded-2xl border-2 border-amber-300 shadow-md flex items-center justify-center">
+                                                        <img
                                                             src="/QR.jpeg"
                                                             alt="PhonePe Payment QR Code"
-                                                            fill
-                                                            className="object-contain p-1 rounded-xl"
+                                                            className="w-full h-full object-contain p-0.5 rounded-xl"
                                                         />
                                                     </div>
                                                     <div className="pt-1 border-t border-amber-200">
@@ -1280,6 +1290,9 @@ export default function Form() {
                                                         </p>
                                                         <p className="text-[10px] font-semibold text-stone-600 mt-0.5">
                                                             (Rajas Balkrushna Gulwade)
+                                                        </p>
+                                                        <p className="text-xs font-bold text-[#7A0C0C] mt-1">
+                                                            📞 UPI & चौकशी मोबाईल: <a href="tel:9595707707" className="underline font-mono">9595707707</a>
                                                         </p>
                                                     </div>
 
@@ -1352,7 +1365,7 @@ export default function Form() {
                                                     </span>
                                                     <span className="text-stone-900 font-extrabold">
                                                         {typedMessage}
-                                                        {typedMessage.length < FULL_SANDESH_MESSAGE.length && (
+                                                        {typedMessage.length < getFullSandeshMessage(membershipType).length && (
                                                             <span className="inline-block w-1.5 h-3.5 bg-amber-800 ml-1 animate-pulse print:hidden" />
                                                         )}
                                                     </span>

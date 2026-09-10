@@ -139,7 +139,7 @@ export default function ExecutivesPublicPage() {
           </div>
 
           <div className="p-6 sm:p-8 space-y-6">
-            
+
             <div className="text-center max-w-2xl mx-auto space-y-2">
               <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-amber-100 font-extrabold text-xs sm:text-sm px-4 py-1 rounded-full border border-amber-400 shadow-xs">
                 विभागीय कार्यकारिणी पदाधिकारी व सदस्य
