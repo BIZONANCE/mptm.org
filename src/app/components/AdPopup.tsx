@@ -90,8 +90,12 @@ export default function AdPopup() {
         setLoading(true);
         const API_URL = getApiUrl();
         const res = await fetch(`${API_URL}/api/ads/active`);
+        const contentType = res.headers.get("content-type") || "";
+        if (!res.ok || !contentType.includes("application/json")) {
+          return;
+        }
         const data = await res.json();
-        if (res.ok && data.success && Array.isArray(data.data) && data.data.length > 0) {
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setAds(data.data);
           setCurrentIndex(0);
           setIsOpen(true);
