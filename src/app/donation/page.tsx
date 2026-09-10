@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Phone, QrCode, Printer, CheckCircle, Upload } from "lucide-react";
+import { ArrowLeft, Phone, QrCode, Printer, CheckCircle, Upload, RefreshCw } from "lucide-react";
 
 // Convert numeric amount to Marathi words automatically for any donation amount
 function convertNumberToMarathiWords(amountStr: string): string {
@@ -66,6 +66,7 @@ export default function DonationPage() {
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [receiptNo, setReceiptNo] = useState("");
+    const [nextSerialNo, setNextSerialNo] = useState("MPTM-2026-DON-001");
     const [submissionDate, setSubmissionDate] = useState("");
 
     const getApiUrl = (): string => {
@@ -78,6 +79,35 @@ export default function DonationPage() {
     };
 
     const API_URL = getApiUrl();
+
+    const fetchNextSerialNo = async () => {
+        try {
+            const res = await fetch(`${API_URL}/api/donation/next-number`);
+            const data = await res.json();
+            if (res.ok && data.success && data.receiptNo) {
+                setNextSerialNo(data.receiptNo);
+            }
+        } catch (err) {
+            console.error("Fetch next serial number error:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchNextSerialNo();
+    }, [API_URL]);
+
+    const handleResetForm = () => {
+        setName("");
+        setMobileNo("");
+        setCity("");
+        setAmount("");
+        setPaymentScreenshot(null);
+        setScreenshotPreview(null);
+        setScreenshotError("");
+        setSubmitted(false);
+        setSubmitting(false);
+        fetchNextSerialNo();
+    };
 
     const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -131,13 +161,13 @@ export default function DonationPage() {
                 setSubmissionDate(data.data.date);
             } else {
                 const now = new Date();
-                setReceiptNo(`MPTM-2026-DON-${Math.floor(1000 + Math.random() * 9000)}`);
+                setReceiptNo(nextSerialNo);
                 setSubmissionDate(`${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`);
             }
         } catch (err) {
             console.error("Donation submit error:", err);
             const now = new Date();
-            setReceiptNo(`MPTM-2026-DON-${Math.floor(1000 + Math.random() * 9000)}`);
+            setReceiptNo(nextSerialNo);
             setSubmissionDate(`${String(now.getDate()).padStart(2, "0")}/${String(now.getMonth() + 1).padStart(2, "0")}/${now.getFullYear()}`);
         } finally {
             setSubmitting(false);
@@ -210,10 +240,13 @@ export default function DonationPage() {
                             {/* Left Side: Donation Form (7 Cols) */}
                             <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
                                 
-                                <div className="border-b border-amber-300 pb-2">
+                                <div className="border-b border-amber-300 pb-2 flex flex-col xs:flex-row xs:items-center justify-between gap-2">
                                     <h2 className="text-base sm:text-lg font-bold text-[#7A0C0C] flex items-center gap-2">
                                         <span>📝 देणगीदार माहिती</span>
                                     </h2>
+                                    <span className="bg-amber-100 text-[#7A0C0C] border border-amber-300 font-mono font-extrabold text-xs px-3 py-1 rounded-full shadow-2xs self-start xs:self-auto">
+                                        अनुक्रमांक / पावती क्र. : {nextSerialNo}
+                                    </span>
                                 </div>
 
                                 {/* Name Input */}
@@ -425,14 +458,24 @@ export default function DonationPage() {
                                     </p>
                                 </div>
                             </div>
-                            <button
-                                type="button"
-                                onClick={handlePrint}
-                                className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer shrink-0"
-                            >
-                                <Printer className="w-4 h-4" />
-                                <span>पावती प्रिंट / डाऊनलोड करा</span>
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={handlePrint}
+                                    className="px-4 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                                >
+                                    <Printer className="w-4 h-4 text-emerald-200" />
+                                    <span>पावती प्रिंट / डाऊनलोड करा</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleResetForm}
+                                    className="px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border border-amber-400/40"
+                                >
+                                    <RefreshCw className="w-4 h-4 text-amber-300" />
+                                    <span>नवीन देणगी नोंदवा (फॉर्म रिफ्रेश करा)</span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Official Marathi Receipt Card - Printable Format matching Form.tsx */}
