@@ -2,11 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import UpcomingEvents from "./components/UpcomingEvents";
 import ConductedEvents from "./components/ConductedEvents";
+import AdPopup from "./components/AdPopup";
 import { Eye, Globe, HeartHandshake, ShieldCheck, Target, Users } from "lucide-react";
 
 export default function Home() {
   return (
     <div className=" flex flex-col bg-[#FAF7F2] text-slate-900 selection:bg-amber-500 selection:text-white">
+      {/* Front Page Pop-up Advertisement */}
+      <AdPopup />
 
       {/* Top Header / Navigation Bar */}
       <header className="bg-[#4A0404] border-b border-amber-500/30 text-white shadow-lg print:hidden">
