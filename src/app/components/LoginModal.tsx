@@ -137,7 +137,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         setGeneratedOtp(data.code || "");
         setOtpStep("SENT");
         setSuccessMsg(
-          `Verification code (OTP) sent to ${emailTrimmed}! Your code is also displayed on screen below for instant access.`
+          `Verification code (OTP) sent to ${emailTrimmed}! Please check your email inbox or spam folder.`
         );
       } else {
         setLoginError(
@@ -422,30 +422,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     <div className="text-xs font-semibold text-slate-900 flex items-start gap-2 pt-1 animate-in fade-in">
                       <Check className="w-4 h-4 shrink-0 text-slate-900 mt-0.5" />
                       <span className="leading-snug">{successMsg}</span>
-                    </div>
-                  )}
-
-                  {/* On-screen OTP Badge Display */}
-                  {generatedOtp && (
-                    <div className="p-3 bg-amber-50 border-2 border-amber-400 rounded-xl flex items-center justify-between shadow-2xs animate-in fade-in">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-xl">🔑</span>
-                        <div>
-                          <p className="text-[10px] font-bold text-amber-900 uppercase tracking-wider">Your Verification OTP</p>
-                          <p className="text-2xl font-black font-mono tracking-widest text-amber-700">{generatedOtp}</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const digits = generatedOtp.split("");
-                          setOtpDigits(digits);
-                          setInputOtp(generatedOtp);
-                        }}
-                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-lg transition shadow-2xs"
-                      >
-                        Auto Fill
-                      </button>
                     </div>
                   )}
 
