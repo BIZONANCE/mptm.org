@@ -257,6 +257,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                 memberNo: formatMemberNo(idx + 1, baseMemberSeq, formData.date),
             }))
         );
+        fetchNextNumbers(type);
     };
 
     // Ensure payment method defaults to UPI if cash is disabled (no referral link)
@@ -322,9 +323,9 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     };
 
     // Fetch unique next receipt and member numbers safely from Backend API
-    const fetchNextNumbers = async () => {
+    const fetchNextNumbers = async (targetType: "PRIMARY" | "EXECUTIVE" = membershipType) => {
         try {
-            const res = await fetchWithFallback("/api/next-numbers");
+            const res = await fetchWithFallback(`/api/next-numbers?type=${targetType}`);
 
             if (!res.ok) {
                 console.warn(`Backend sequence API returned status ${res.status}`);
@@ -346,12 +347,12 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                 setBaseMemberSeq(mSeq);
                 setFormData((prev) => ({
                     ...prev,
-                    receiptNo: formatReceiptNo(rSeq, prev.date, membershipType === "EXECUTIVE"),
+                    receiptNo: data.receiptNo || formatReceiptNo(rSeq, prev.date, targetType === "EXECUTIVE"),
                 }));
                 setMainMembers((prev) =>
                     prev.map((m, idx) => ({
                         ...m,
-                        memberNo: formatMemberNo(idx + 1, mSeq, formData.date),
+                        memberNo: data.nextMemberNo && idx === 0 ? data.nextMemberNo : formatMemberNo(idx + 1, mSeq, formData.date),
                     }))
                 );
             }
@@ -361,8 +362,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     };
 
     useEffect(() => {
-        fetchNextNumbers();
-    }, []);
+        fetchNextNumbers(membershipType);
+    }, [membershipType]);
 
     // Typing transition effect for Sandesh (संदेश) message
     useEffect(() => {
