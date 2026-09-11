@@ -121,9 +121,22 @@ export default function AdPopup() {
     return () => clearInterval(timer);
   }, [isOpen, ads.length, isHovered]);
 
-  if (!isOpen || ads.length === 0) return null;
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null);
 
   const currentAd = ads[currentIndex] || ads[0];
+
+  useEffect(() => {
+    setAspectRatio(null);
+  }, [currentAd?.id]);
+
+  const handleImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      setAspectRatio(naturalWidth / naturalHeight);
+    }
+  };
+
+  if (!isOpen || ads.length === 0) return null;
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + ads.length) % ads.length);
@@ -142,53 +155,67 @@ export default function AdPopup() {
     currentAd.socialLinks?.website;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-300 print:hidden font-sans">
-      <div className="bg-white rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200 relative my-auto animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-300 print:hidden font-sans overflow-y-auto">
+      <div
+        style={{
+          width: aspectRatio ? `min(calc(75vh * ${aspectRatio}), 92vw, 48rem)` : undefined,
+          minWidth: "280px",
+        }}
+        className="bg-white rounded-2xl max-w-[95vw] sm:max-w-3xl md:max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-200 relative my-auto animate-in zoom-in-95 duration-200 flex flex-col transition-[width] duration-300"
+      >
 
         {/* Floating Close Button */}
         <button
           onClick={() => setIsOpen(false)}
-          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-black/75 hover:bg-black text-white flex items-center justify-center transition cursor-pointer shadow-lg border border-white/40"
+          className="absolute top-2.5 right-2.5 z-30 w-8 h-8 rounded-full bg-black/75 hover:bg-black text-white flex items-center justify-center transition cursor-pointer shadow-lg border border-white/40 backdrop-blur-xs"
           title="Close Advertisement"
         >
           <X className="w-4 h-4" />
         </button>
 
         {/* Modal Body Container */}
-        <div className="p-1.5 sm:p-2 space-y-1.5">
+        <div className="p-1.5 sm:p-2 flex flex-col min-h-0 overflow-hidden space-y-1.5">
 
           {/* Ad Image Container with Hover Detect & Nav Controls */}
           {currentAd.imageUrl && (
             <div
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
-              className="relative w-full h-[45vh] max-h-[420px] sm:h-[390px] rounded-xl overflow-hidden shadow-xs bg-white flex items-center justify-center group"
+              className="relative max-h-[75vh] w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-50/50 group"
             >
               {currentAd.adLink ? (
                 <a
                   href={currentAd.adLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full h-full cursor-pointer relative"
+                  className="block cursor-pointer relative max-h-[75vh] w-full"
                   title="Click to view advertisement"
                 >
-                  <Image
+                  <img
                     key={currentAd.id}
+                    ref={(img) => {
+                      if (img && img.complete && img.naturalWidth && !aspectRatio) {
+                        setAspectRatio(img.naturalWidth / img.naturalHeight);
+                      }
+                    }}
                     src={currentAd.imageUrl}
                     alt={currentAd.title || "Advertisement"}
-                    fill
-                    priority
-                    className="object-contain transition-all duration-500 ease-in-out group-hover:scale-[1.01]"
+                    onLoad={handleImgLoad}
+                    className="max-h-[75vh] w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-[1.01] rounded-xl block mx-auto"
                   />
                 </a>
               ) : (
-                <Image
+                <img
                   key={currentAd.id}
+                  ref={(img) => {
+                    if (img && img.complete && img.naturalWidth && !aspectRatio) {
+                      setAspectRatio(img.naturalWidth / img.naturalHeight);
+                    }
+                  }}
                   src={currentAd.imageUrl}
                   alt={currentAd.title || "Advertisement"}
-                  fill
-                  priority
-                  className="object-contain transition-all duration-500 ease-in-out"
+                  onLoad={handleImgLoad}
+                  className="max-h-[75vh] w-full h-auto object-contain transition-all duration-500 ease-in-out rounded-xl block mx-auto"
                 />
               )}
 
@@ -197,14 +224,14 @@ export default function AdPopup() {
                 <>
                   <button
                     onClick={handlePrev}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition shadow-md border border-white/30 cursor-pointer"
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition shadow-md border border-white/30 cursor-pointer"
                     title="Previous Ad"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={handleNext}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition shadow-md border border-white/30 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition shadow-md border border-white/30 cursor-pointer"
                     title="Next Ad"
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -215,7 +242,7 @@ export default function AdPopup() {
           )}
 
           {/* Bottom Strip: Social Media Icons + Autoscroll Pagination */}
-          <div className="flex items-center justify-between py-0.5 px-1.5 min-h-[36px]">
+          <div className="flex items-center justify-between gap-3 py-1 px-1.5 min-h-[38px] w-full shrink-0">
 
             {/* Social Icons (Left Side) */}
             <div className="flex items-center justify-start gap-3">
