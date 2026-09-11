@@ -18,11 +18,53 @@ export interface AdItem {
   title: string;
   subtitle?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  mediaType?: "image" | "video";
   adLink?: string;
   socialLinks?: SocialLinks;
   isActive: boolean;
   createdAt: string;
+  updatedAt?: string;
 }
+
+const DEFAULT_DEMO_ADS: AdItem[] = [
+  {
+    id: "ad_101",
+    title: "महाराष्ट्र प्रांतिक तैलिक महासभा – विशेष नोंदणी अभियान २०२६",
+    subtitle: "अमरावती विभागातील सर्व तैलिक बांधवांसाठी महत्त्वाची सूचना",
+    mediaType: "image",
+    imageUrl: "/mptmm.png",
+    adLink: "https://mptmamravati.org/registration",
+    socialLinks: {
+      whatsapp: "https://wa.me/919876543210?text=Hello%20MPTM%20Amravati",
+      facebook: "https://facebook.com",
+      instagram: "https://instagram.com",
+      youtube: "https://youtube.com",
+      twitter: "https://x.com",
+      website: "https://mptmamravati.org"
+    },
+    isActive: true,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "ad_102_video_demo",
+    title: "महाराष्ट्र प्रांतिक तैलिक महासभा (व्हीडिओ जाहिरात)",
+    subtitle: "अमरावती विभागातील सर्व तैलिक बांधवांसाठी व्हीडिओ जाहिरात",
+    mediaType: "video",
+    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    imageUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    adLink: "https://mptmamravati.org",
+    socialLinks: {
+      whatsapp: "https://wa.me/919876543210",
+      facebook: "https://facebook.com",
+      instagram: "https://instagram.com",
+      youtube: "https://youtube.com",
+      website: "https://mptmamravati.org"
+    },
+    isActive: true,
+    createdAt: new Date().toISOString()
+  }
+];
 
 // Authentic Real SVG Brand Icons
 const WhatsappIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
@@ -68,7 +110,7 @@ const TwitterIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
 );
 
 export default function AdPopup() {
-  const [ads, setAds] = useState<AdItem[]>([]);
+  const [ads, setAds] = useState<AdItem[]>(DEFAULT_DEMO_ADS);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -92,6 +134,8 @@ export default function AdPopup() {
         const res = await fetch(`${API_URL}/api/ads/active`);
         const contentType = res.headers.get("content-type") || "";
         if (!res.ok || !contentType.includes("application/json")) {
+          setAds(DEFAULT_DEMO_ADS);
+          setIsOpen(true);
           return;
         }
         const data = await res.json();
@@ -99,9 +143,14 @@ export default function AdPopup() {
           setAds(data.data);
           setCurrentIndex(0);
           setIsOpen(true);
+        } else {
+          setAds(DEFAULT_DEMO_ADS);
+          setIsOpen(true);
         }
       } catch (err) {
         console.error("Fetch pop-up ads error:", err);
+        setAds(DEFAULT_DEMO_ADS);
+        setIsOpen(true);
       } finally {
         setLoading(false);
       }
@@ -116,7 +165,7 @@ export default function AdPopup() {
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % ads.length);
-    }, 4500);
+    }, 5500);
 
     return () => clearInterval(timer);
   }, [isOpen, ads.length, isHovered]);
@@ -145,6 +194,14 @@ export default function AdPopup() {
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % ads.length);
   };
+
+  const isVideoAd = (ad: AdItem) => {
+    if (ad.mediaType === "video") return true;
+    const url = ad.videoUrl || ad.imageUrl || "";
+    return url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg") || url.startsWith("data:video/");
+  };
+
+  const mediaSrc = currentAd.videoUrl || currentAd.imageUrl;
 
   const hasSocialLinks =
     currentAd.socialLinks?.whatsapp ||
@@ -176,14 +233,31 @@ export default function AdPopup() {
         {/* Modal Body Container */}
         <div className="p-1.5 sm:p-2 flex flex-col min-h-0 overflow-hidden space-y-1.5">
 
-          {/* Ad Image Container with Hover Detect & Nav Controls */}
-          {currentAd.imageUrl && (
+          {/* Ad Image / Video Container with Hover Detect & Nav Controls */}
+          {mediaSrc && (
             <div
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
-              className="relative max-h-[75vh] w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-50/50 group"
+              className="relative max-h-[75vh] w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-900 group"
             >
-              {currentAd.adLink ? (
+              {isVideoAd(currentAd) ? (
+                <video
+                  key={currentAd.id}
+                  src={mediaSrc}
+                  autoPlay
+                  loop
+                  muted
+                  controls
+                  playsInline
+                  onLoadedMetadata={(e) => {
+                    const { videoWidth, videoHeight } = e.currentTarget;
+                    if (videoWidth && videoHeight) {
+                      setAspectRatio(videoWidth / videoHeight);
+                    }
+                  }}
+                  className="max-h-[75vh] w-full h-auto object-contain rounded-xl block mx-auto shadow-xs"
+                />
+              ) : currentAd.adLink ? (
                 <a
                   href={currentAd.adLink}
                   target="_blank"
@@ -198,7 +272,7 @@ export default function AdPopup() {
                         setAspectRatio(img.naturalWidth / img.naturalHeight);
                       }
                     }}
-                    src={currentAd.imageUrl}
+                    src={mediaSrc}
                     alt={currentAd.title || "Advertisement"}
                     onLoad={handleImgLoad}
                     className="max-h-[75vh] w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-[1.01] rounded-xl block mx-auto"
@@ -212,7 +286,7 @@ export default function AdPopup() {
                       setAspectRatio(img.naturalWidth / img.naturalHeight);
                     }
                   }}
-                  src={currentAd.imageUrl}
+                  src={mediaSrc}
                   alt={currentAd.title || "Advertisement"}
                   onLoad={handleImgLoad}
                   className="max-h-[75vh] w-full h-auto object-contain transition-all duration-500 ease-in-out rounded-xl block mx-auto"
