@@ -200,249 +200,249 @@ export default function DonationPage() {
                     </Link>
                 </div>
 
-                {/* Combined Form & Header Container */}
-                <div className={`bg-[#FFFDF9] rounded-xl sm:rounded-2xl border-2 border-amber-800/40 shadow-2xl overflow-hidden ${submitted ? "print:hidden" : ""}`}>
-                    
-                    {/* Top Traditional Marathi Banner Header matching Form.tsx */}
-                    <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-4 px-4 sm:py-5 sm:px-6 relative flex items-center justify-between border-b-2 border-amber-400">
-                        <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
-                            <span>❖</span>
-                            <span className="w-6 h-[2px] bg-amber-400"></span>
-                        </div>
+                {!submitted ? (
+                    /* Combined Form & Header Container */
+                    <div className="bg-[#FFFDF9] rounded-xl sm:rounded-2xl border-2 border-amber-800/40 shadow-2xl overflow-hidden">
+                        
+                        {/* Top Traditional Marathi Banner Header matching Form.tsx */}
+                        <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-4 px-4 sm:py-5 sm:px-6 relative flex items-center justify-between border-b-2 border-amber-400">
+                            <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
+                                <span>❖</span>
+                                <span className="w-6 h-[2px] bg-amber-400"></span>
+                            </div>
 
-                        <div className="text-center mx-auto space-y-1">
-                            <p className="text-xs sm:text-sm font-bold text-amber-400">
-                                ❖ जय संताजी ❖
-                            </p>
-                            <h1 className="text-lg sm:text-2xl font-black text-amber-200 drop-shadow-md leading-tight">
-                                महाराष्ट्र प्रांतिक तैलिक महासभा
-                            </h1>
-                            <p className="text-xs sm:text-sm text-sky-200 font-bold">
-                                अमरावती विभाग, अमरावती.
-                            </p>
-                            <div className="inline-block mt-1">
-                                <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-amber-100 font-extrabold text-xs sm:text-sm px-4 py-0.5 rounded-full border border-amber-400 shadow-xs">
-                                    ऐच्छिक देणगी नोंदणी अर्ज
-                                </span>
+                            <div className="text-center mx-auto space-y-1">
+                                <p className="text-xs sm:text-sm font-bold text-amber-400">
+                                    ❖ जय संताजी ❖
+                                </p>
+                                <h1 className="text-lg sm:text-2xl font-black text-amber-200 drop-shadow-md leading-tight">
+                                    महाराष्ट्र प्रांतिक तैलिक महासभा
+                                </h1>
+                                <p className="text-xs sm:text-sm text-sky-200 font-bold">
+                                    अमरावती विभाग, अमरावती.
+                                </p>
+                                <div className="inline-block mt-1">
+                                    <span className="bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 text-amber-100 font-extrabold text-xs sm:text-sm px-4 py-0.5 rounded-full border border-amber-400 shadow-xs">
+                                        ऐच्छिक देणगी नोंदणी अर्ज
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
+                                <span className="w-6 h-[2px] bg-amber-400"></span>
+                                <span>❖</span>
                             </div>
                         </div>
 
-                        <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
-                            <span className="w-6 h-[2px] bg-amber-400"></span>
-                            <span>❖</span>
-                        </div>
-                    </div>
+                        {/* Form Body Container */}
+                        <div className="p-4 sm:p-6 space-y-6 text-stone-900">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                    {/* Form Body Container */}
-                    <div className="p-4 sm:p-6 space-y-6 text-stone-900">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-                            {/* Left Side: Donation Form (7 Cols) */}
-                            <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
-                                
-                                <div className="border-b border-amber-300 pb-2 flex flex-col xs:flex-row xs:items-center justify-between gap-2">
-                                    <h2 className="text-base sm:text-lg font-bold text-[#7A0C0C] flex items-center gap-2">
-                                        <span>📝 देणगीदार माहिती</span>
-                                    </h2>
-                                    <span className="bg-amber-100 text-[#7A0C0C] border border-amber-300 font-mono font-extrabold text-xs px-3 py-1 rounded-full shadow-2xs self-start xs:self-auto">
-                                        अनुक्रमांक / पावती क्र. : {nextSerialNo}
-                                    </span>
-                                </div>
-
-                                {/* Name Input */}
-                                <div className="space-y-1">
-                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                        पूर्ण नाव <span className="text-red-600">*</span> :
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        required
-                                        placeholder="देणगीदाराचे पूर्ण नाव प्रविष्ट करा"
-                                        className={inputBaseStyle}
-                                    />
-                                </div>
-
-                                {/* Mobile Input */}
-                                <div className="space-y-1">
-                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                        मोबाईल नंबर <span className="text-red-600">*</span> :
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        value={mobileNo}
-                                        onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                                        required
-                                        maxLength={10}
-                                        pattern="[0-9]{10}"
-                                        inputMode="numeric"
-                                        placeholder="१० अंकी मोबाईल नंबर"
-                                        className={inputBaseStyle}
-                                    />
-                                </div>
-
-                                {/* City Input */}
-                                <div className="space-y-1">
-                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                        शहर / गाव <span className="text-red-600">*</span> :
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                        required
-                                        placeholder="तुमचे शहर किंवा गाव प्रविष्ट करा"
-                                        className={inputBaseStyle}
-                                    />
-                                </div>
-
-                                {/* Amount Input */}
-                                <div className="space-y-2">
-                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                        देणगी रक्कम (₹) <span className="text-red-600">*</span> :
-                                    </label>
-
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        required
-                                        placeholder="देणगी रक्कम (₹)"
-                                        className={`${inputBaseStyle} font-extrabold text-[#7A0C0C] text-lg sm:text-xl`}
-                                    />
-
-                                    {amount && parseInt(amount, 10) > 0 && (
-                                        <p className="text-xs font-bold text-[#7A0C0C] bg-amber-100/60 p-2.5 rounded-lg border border-amber-300">
-                                            अक्षरी रक्कम : {convertNumberToMarathiWords(amount)}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Payment Screenshot Image Picker */}
-                                <div className="space-y-2 pt-3 border-t border-amber-300">
-                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                        पावती / ट्रान्सअॅक्शन स्क्रीनशॉट निवडा <span className="text-red-600">*</span> :
-                                    </label>
+                                {/* Left Side: Donation Form (7 Cols) */}
+                                <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
                                     
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2.5 bg-amber-50/60 p-3 rounded-xl border border-amber-300/60">
-                                            <label
-                                                htmlFor="donation-screenshot-upload"
-                                                className="min-h-[42px] bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 hover:from-amber-800 hover:to-amber-900 text-amber-100 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all whitespace-nowrap flex items-center gap-2 shadow-sm border border-amber-400/50"
-                                            >
-                                                <Upload className="w-4 h-4 text-amber-300" />
-                                                <span>स्क्रीनशॉट फाईल निवडा</span>
-                                            </label>
-                                            <span className="text-xs font-semibold text-stone-700 truncate flex-1 px-1">
-                                                {paymentScreenshot ? paymentScreenshot.name : "कोणतीही फाईल निवडली नाही"}
-                                            </span>
-                                        </div>
+                                    <div className="border-b border-amber-300 pb-2 flex flex-col xs:flex-row xs:items-center justify-between gap-2">
+                                        <h2 className="text-base sm:text-lg font-bold text-[#7A0C0C] flex items-center gap-2">
+                                            <span>📝 देणगीदार माहिती</span>
+                                        </h2>
+                                        <span className="bg-amber-100 text-[#7A0C0C] border border-amber-300 font-mono font-extrabold text-xs px-3 py-1 rounded-full shadow-2xs self-start xs:self-auto">
+                                            अनुक्रमांक / पावती क्र. : {nextSerialNo}
+                                        </span>
+                                    </div>
+
+                                    {/* Name Input */}
+                                    <div className="space-y-1">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            पूर्ण नाव <span className="text-red-600">*</span> :
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            required
+                                            placeholder="देणगीदाराचे पूर्ण नाव प्रविष्ट करा"
+                                            className={inputBaseStyle}
+                                        />
+                                    </div>
+
+                                    {/* Mobile Input */}
+                                    <div className="space-y-1">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            मोबाईल नंबर <span className="text-red-600">*</span> :
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={mobileNo}
+                                            onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                                            required
+                                            maxLength={10}
+                                            pattern="[0-9]{10}"
+                                            inputMode="numeric"
+                                            placeholder="१० अंकी मोबाईल नंबर"
+                                            className={inputBaseStyle}
+                                        />
+                                    </div>
+
+                                    {/* City Input */}
+                                    <div className="space-y-1">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            शहर / गाव <span className="text-red-600">*</span> :
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={city}
+                                            onChange={(e) => setCity(e.target.value)}
+                                            required
+                                            placeholder="तुमचे शहर किंवा गाव प्रविष्ट करा"
+                                            className={inputBaseStyle}
+                                        />
+                                    </div>
+
+                                    {/* Amount Input */}
+                                    <div className="space-y-2">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            देणगी रक्कम (₹) <span className="text-red-600">*</span> :
+                                        </label>
 
                                         <input
-                                            type="file"
-                                            accept="image/*"
-                                            id="donation-screenshot-upload"
-                                            onChange={handleScreenshotChange}
-                                            className="hidden"
+                                            type="number"
+                                            min="1"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            required
+                                            placeholder="देणगी रक्कम (₹)"
+                                            className={`${inputBaseStyle} font-extrabold text-[#7A0C0C] text-lg sm:text-xl`}
                                         />
 
-                                        {screenshotPreview && (
-                                            <div className="relative w-full p-3 bg-emerald-50/90 rounded-xl border border-emerald-300 flex items-center gap-3 shadow-xs">
-                                                <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-emerald-400 shrink-0">
-                                                    <img
-                                                        src={screenshotPreview}
-                                                        alt="Payment Screenshot Preview"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-900">
-                                                        <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold shrink-0">✓</span>
-                                                        <span>स्क्रीनशॉट यशस्वीरित्या जोडला गेला</span>
-                                                    </div>
-                                                    <p className="text-xs text-stone-600 truncate mt-0.5 font-medium">
-                                                        {paymentScreenshot?.name}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {screenshotError && (
-                                            <p className="text-xs font-bold text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200">
-                                                {screenshotError}
+                                        {amount && parseInt(amount, 10) > 0 && (
+                                            <p className="text-xs font-bold text-[#7A0C0C] bg-amber-100/60 p-2.5 rounded-lg border border-amber-300">
+                                                अक्षरी रक्कम : {convertNumberToMarathiWords(amount)}
                                             </p>
                                         )}
                                     </div>
-                                </div>
 
-                                {/* Submit Button matching Form.tsx */}
-                                <div className="pt-3">
-                                    <button
-                                        type="submit"
-                                        disabled={!paymentScreenshot || submitting}
-                                        className={`w-full min-h-[50px] font-extrabold text-base sm:text-lg rounded-full shadow-xl border-2 transition-all flex items-center justify-center gap-2.5 ${
-                                            !paymentScreenshot || submitting
-                                                ? "bg-stone-200 text-stone-500 border-stone-300 cursor-not-allowed"
-                                                : "bg-gradient-to-r from-[#7A0C0C] via-[#9E1010] to-[#7A0C0C] hover:from-[#5A0808] hover:to-[#5A0808] text-amber-200 border-amber-400 cursor-pointer active:scale-[0.99]"
-                                        }`}
-                                    >
-                                        <Printer className="w-5 h-5 text-amber-300" />
-                                        <span>{submitting ? "जतन करत आहे..." : "देणगी नोंदवा आणि पावती डाऊनलोड करा"}</span>
-                                    </button>
-                                </div>
-                            </form>
+                                    {/* Payment Screenshot Image Picker */}
+                                    <div className="space-y-2 pt-3 border-t border-amber-300">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            पावती / ट्रान्सअॅक्शन स्क्रीनशॉट निवडा <span className="text-red-600">*</span> :
+                                        </label>
+                                        
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2.5 bg-amber-50/60 p-3 rounded-xl border border-amber-300/60">
+                                                <label
+                                                    htmlFor="donation-screenshot-upload"
+                                                    className="min-h-[42px] bg-gradient-to-r from-amber-700 via-amber-800 to-amber-900 hover:from-amber-800 hover:to-amber-900 text-amber-100 text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl cursor-pointer transition-all whitespace-nowrap flex items-center gap-2 shadow-sm border border-amber-400/50"
+                                                >
+                                                    <Upload className="w-4 h-4 text-amber-300" />
+                                                    <span>स्क्रीनशॉट फाईल निवडा</span>
+                                                </label>
+                                                <span className="text-xs font-semibold text-stone-700 truncate flex-1 px-1">
+                                                    {paymentScreenshot ? paymentScreenshot.name : "कोणतीही फाईल निवडली नाही"}
+                                                </span>
+                                            </div>
 
-                            {/* Right Side: QR Code & Payment Mobile Info (5 Cols) */}
-                            <div className="lg:col-span-5 bg-amber-50/60 p-5 rounded-xl border border-amber-300/60 space-y-4 text-center">
-                                <div className="space-y-1">
-                                    <h3 className="text-sm font-bold text-[#7A0C0C] flex items-center justify-center gap-1.5">
-                                        <QrCode className="w-4 h-4 text-amber-800" />
-                                        <span>PhonePe / Google Pay / Paytm द्वारे क्यूआर कोड स्कॅन करा</span>
-                                    </h3>
-                                    <p className="text-xs text-stone-600 font-semibold">
-                                        UPI QR Code
-                                    </p>
-                                </div>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                id="donation-screenshot-upload"
+                                                onChange={handleScreenshotChange}
+                                                className="hidden"
+                                            />
 
-                                {/* QR Image */}
-                                <div className="relative w-44 h-44 sm:w-48 sm:h-48 mx-auto bg-white p-2 rounded-xl border border-amber-300 shadow-md">
-                                    <Image
-                                        src="/QR.jpeg"
-                                        alt="Payment QR Code"
-                                        fill
-                                        className="object-contain p-1 rounded-lg"
-                                    />
-                                </div>
+                                            {screenshotPreview && (
+                                                <div className="relative w-full p-3 bg-emerald-50/90 rounded-xl border border-emerald-300 flex items-center gap-3 shadow-xs">
+                                                    <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-emerald-400 shrink-0">
+                                                        <img
+                                                            src={screenshotPreview}
+                                                            alt="Payment Screenshot Preview"
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-900">
+                                                            <span className="w-4 h-4 rounded-full bg-emerald-700 text-white text-[10px] flex items-center justify-center font-bold shrink-0">✓</span>
+                                                            <span>स्क्रीनशॉट यशस्वीरित्या जोडला गेला</span>
+                                                        </div>
+                                                        <p className="text-xs text-stone-600 truncate mt-0.5 font-medium">
+                                                            {paymentScreenshot?.name}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
 
-                                <p className="text-xs font-bold text-stone-800">
-                                    Rajas Balkrushna Gulwade
-                                </p>
-
-                                {/* Mobile Number for Payment & Helpline */}
-                                <div className="bg-white p-3.5 rounded-xl border border-amber-300 text-stone-900 shadow-xs space-y-1.5">
-                                    <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-stone-800">
-                                        <Phone className="w-4 h-4 text-emerald-700 fill-emerald-700 animate-bounce" />
-                                        <span>देयक व अधिक माहितीसाठी संपर्क मोबाईल:</span>
+                                            {screenshotError && (
+                                                <p className="text-xs font-bold text-red-700 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                                                    {screenshotError}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <a
-                                        href="tel:9595707707"
-                                        className="block text-xl font-black text-[#7A0C0C] tracking-wider hover:underline"
-                                    >
-                                        9595707707
-                                    </a>
-                                    <p className="text-[11px] font-bold text-emerald-900 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-300">
-                                        (PhonePe / Google Pay / UPI पेमेंट व चौकशीसाठी)
+
+                                    {/* Submit Button matching Form.tsx */}
+                                    <div className="pt-3">
+                                        <button
+                                            type="submit"
+                                            disabled={!paymentScreenshot || submitting}
+                                            className={`w-full min-h-[50px] font-extrabold text-base sm:text-lg rounded-full shadow-xl border-2 transition-all flex items-center justify-center gap-2.5 ${
+                                                !paymentScreenshot || submitting
+                                                    ? "bg-stone-200 text-stone-500 border-stone-300 cursor-not-allowed"
+                                                    : "bg-gradient-to-r from-[#7A0C0C] via-[#9E1010] to-[#7A0C0C] hover:from-[#5A0808] hover:to-[#5A0808] text-amber-200 border-amber-400 cursor-pointer active:scale-[0.99]"
+                                            }`}
+                                        >
+                                            <Printer className="w-5 h-5 text-amber-300" />
+                                            <span>{submitting ? "जतन करत आहे..." : "देणगी नोंदवा आणि पावती डाऊनलोड करा"}</span>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {/* Right Side: QR Code & Payment Mobile Info (5 Cols) */}
+                                <div className="lg:col-span-5 bg-amber-50/60 p-5 rounded-xl border border-amber-300/60 space-y-4 text-center">
+                                    <div className="space-y-1">
+                                        <h3 className="text-sm font-bold text-[#7A0C0C] flex items-center justify-center gap-1.5">
+                                            <QrCode className="w-4 h-4 text-amber-800" />
+                                            <span>PhonePe / Google Pay / Paytm द्वारे क्यूआर कोड स्कॅन करा</span>
+                                        </h3>
+                                        <p className="text-xs text-stone-600 font-semibold">
+                                            UPI QR Code
+                                        </p>
+                                    </div>
+
+                                    {/* QR Image */}
+                                    <div className="relative w-44 h-44 sm:w-48 sm:h-48 mx-auto bg-white p-2 rounded-xl border border-amber-300 shadow-md">
+                                        <Image
+                                            src="/QR.jpeg"
+                                            alt="Payment QR Code"
+                                            fill
+                                            className="object-contain p-1 rounded-lg"
+                                        />
+                                    </div>
+
+                                    <p className="text-xs font-bold text-stone-800">
+                                        Rajas Balkrushna Gulwade
                                     </p>
+
+                                    {/* Mobile Number for Payment & Helpline */}
+                                    <div className="bg-white p-3.5 rounded-xl border border-amber-300 text-stone-900 shadow-xs space-y-1.5">
+                                        <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-stone-800">
+                                            <Phone className="w-4 h-4 text-emerald-700 fill-emerald-700 animate-bounce" />
+                                            <span>देयक व अधिक माहितीसाठी संपर्क मोबाईल:</span>
+                                        </div>
+                                        <a
+                                            href="tel:9595707707"
+                                            className="block text-xl font-black text-[#7A0C0C] tracking-wider hover:underline"
+                                        >
+                                            9595707707
+                                        </a>
+                                        <p className="text-[11px] font-bold text-emerald-900 bg-emerald-50 py-1 px-2 rounded-md border border-emerald-300">
+                                            (PhonePe / Google Pay / UPI पेमेंट व चौकशीसाठी)
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Printable Official Marathi Receipt Section */}
-                {submitted && (
+                ) : (
+                    /* Printable Official Marathi Receipt Section */
                     <div className="space-y-4">
                         
                         {/* Interactive Success Alert Banner */}
