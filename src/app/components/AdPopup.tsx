@@ -196,12 +196,37 @@ export default function AdPopup() {
   };
 
   const isVideoAd = (ad: AdItem) => {
+    if (!ad) return false;
     if (ad.mediaType === "video") return true;
-    const url = ad.videoUrl || ad.imageUrl || "";
-    return url.endsWith(".mp4") || url.endsWith(".webm") || url.endsWith(".ogg") || url.startsWith("data:video/");
+    if (ad.videoUrl && ad.videoUrl.trim() !== "") return true;
+    const url = (ad.imageUrl || "").toLowerCase().trim();
+    if (!url) return false;
+    return (
+      url.startsWith("data:video/") ||
+      url.startsWith("data:application/octet-stream") ||
+      url.includes(".mp4") ||
+      url.includes(".webm") ||
+      url.includes(".ogg") ||
+      url.includes(".mov") ||
+      url.includes(".mkv") ||
+      url.includes("youtube.com") ||
+      url.includes("youtu.be") ||
+      url.includes("vimeo.com")
+    );
+  };
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[2].length === 11
+      ? `https://www.youtube.com/embed/${match[2]}?autoplay=1&mute=1&loop=1`
+      : null;
   };
 
   const mediaSrc = currentAd.videoUrl || currentAd.imageUrl;
+  const isVideo = isVideoAd(currentAd);
+  const ytEmbed = isVideo && mediaSrc ? getYouTubeEmbedUrl(mediaSrc) : null;
 
   const hasSocialLinks =
     currentAd.socialLinks?.whatsapp ||
@@ -215,7 +240,7 @@ export default function AdPopup() {
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-300 print:hidden font-sans overflow-y-auto">
       <div
         style={{
-          width: aspectRatio ? `min(calc(75vh * ${aspectRatio}), 92vw, 48rem)` : undefined,
+          width: aspectRatio ? `min(calc(75vh * ${aspectRatio}), 92vw, 48rem)` : "min(90vw, 42rem)",
           minWidth: "280px",
         }}
         className="bg-white rounded-2xl max-w-[95vw] sm:max-w-3xl md:max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-200 relative my-auto animate-in zoom-in-95 duration-200 flex flex-col transition-[width] duration-300"
@@ -240,7 +265,15 @@ export default function AdPopup() {
               onMouseLeave={() => setIsHovered(false)}
               className="relative max-h-[75vh] w-full flex items-center justify-center overflow-hidden rounded-xl bg-slate-900 group"
             >
-              {isVideoAd(currentAd) ? (
+              {ytEmbed ? (
+                <iframe
+                  key={currentAd.id}
+                  src={ytEmbed}
+                  className="w-full h-[55vh] min-h-[300px] rounded-xl border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : isVideo ? (
                 <video
                   key={currentAd.id}
                   src={mediaSrc}
@@ -249,13 +282,18 @@ export default function AdPopup() {
                   muted
                   controls
                   playsInline
+                  ref={(vid) => {
+                    if (vid && vid.videoWidth && vid.videoHeight && !aspectRatio) {
+                      setAspectRatio(vid.videoWidth / vid.videoHeight);
+                    }
+                  }}
                   onLoadedMetadata={(e) => {
                     const { videoWidth, videoHeight } = e.currentTarget;
                     if (videoWidth && videoHeight) {
                       setAspectRatio(videoWidth / videoHeight);
                     }
                   }}
-                  className="max-h-[75vh] w-full h-auto object-contain rounded-xl block mx-auto shadow-xs"
+                  className="max-h-[75vh] w-full h-auto object-contain rounded-xl block mx-auto shadow-xs bg-black"
                 />
               ) : currentAd.adLink ? (
                 <a
