@@ -361,99 +361,121 @@ export default function AdPopup() {
             </div>
           )}
 
-          {/* Bottom Strip: Social Media Icons + Autoscroll Pagination */}
-          <div className="flex items-center justify-between gap-3 py-1 px-1.5 min-h-[38px] w-full shrink-0">
+          {/* Bottom Strip: Action Pills & Social Media Icons + Autoscroll Pagination */}
+          <div className="flex items-center justify-between gap-2.5 py-1 px-1.5 min-h-[42px] w-full shrink-0 flex-wrap">
 
-            {/* Social & Action Icons (Left Side) */}
-            <div className="flex items-center justify-start gap-2.5 sm:gap-3 flex-wrap">
+            {/* Left Side: Call Us Pill, Visit Us Pill, and Follow Us Pill Container */}
+            <div className="flex items-center justify-start gap-2 flex-wrap">
+
+              {/* 1. Call Us Pill */}
               {currentAd.socialLinks?.phone && (
                 <a
                   href={currentAd.socialLinks.phone.startsWith("tel:") ? currentAd.socialLinks.phone : `tel:${currentAd.socialLinks.phone}`}
-                  className="p-1 text-emerald-600 hover:text-emerald-500 hover:scale-115 transition duration-200 cursor-pointer flex items-center gap-1 group"
+                  className="px-3 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100/90 text-emerald-700 border border-emerald-300/80 shadow-2xs hover:shadow-xs hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer flex items-center gap-1.5 font-bold text-xs shrink-0"
                   title="Call Us"
                 >
-                  <Phone className="w-5.5 h-5.5 sm:w-6 sm:h-6" />
-                  <span className="text-[11px] font-bold text-emerald-700 hidden sm:inline group-hover:underline">Call Us</span>
+                  <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Call Us</span>
                 </a>
               )}
+
+              {/* 2. Visit Us Pill */}
               {currentAd.socialLinks?.visitUs && (
                 <a
                   href={currentAd.socialLinks.visitUs}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-1 text-purple-600 hover:text-purple-500 hover:scale-115 transition duration-200 cursor-pointer flex items-center gap-1 group"
+                  className="px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100/90 text-purple-700 border border-purple-300/80 shadow-2xs hover:shadow-xs hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer flex items-center gap-1.5 font-bold text-xs shrink-0"
                   title="Visit Us"
                 >
-                  <MapPin className="w-5.5 h-5.5 sm:w-6 sm:h-6" />
-                  <span className="text-[11px] font-bold text-purple-700 hidden sm:inline group-hover:underline">Visit Us</span>
+                  <MapPin className="w-4 h-4 text-purple-600 shrink-0" />
+                  <span>Visit Us</span>
                 </a>
               )}
-              {currentAd.socialLinks?.whatsapp && (
-                <a
-                  href={currentAd.socialLinks.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 text-[#25D366] hover:scale-115 transition duration-200 cursor-pointer"
-                  title="WhatsApp"
-                >
-                  <WhatsappIcon className="w-6 h-6" />
-                </a>
+
+              {/* 3. Follow Us Pill Container with all Social Media Icons */}
+              {(currentAd.socialLinks?.whatsapp ||
+                currentAd.socialLinks?.facebook ||
+                currentAd.socialLinks?.instagram ||
+                currentAd.socialLinks?.youtube ||
+                currentAd.socialLinks?.twitter ||
+                currentAd.socialLinks?.website) && (
+                <div className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200/90 shadow-2xs flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-extrabold text-slate-700 tracking-wide select-none mr-0.5">
+                    Follow Us:
+                  </span>
+                  
+                  <div className="flex items-center gap-2">
+                    {currentAd.socialLinks?.whatsapp && (
+                      <a
+                        href={currentAd.socialLinks.whatsapp}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[#25D366] hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="WhatsApp"
+                      >
+                        <WhatsappIcon className="w-5 h-5" />
+                      </a>
+                    )}
+                    {currentAd.socialLinks?.facebook && (
+                      <a
+                        href={currentAd.socialLinks.facebook}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[#1877F2] hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="Facebook"
+                      >
+                        <FacebookIcon className="w-5 h-5" />
+                      </a>
+                    )}
+                    {currentAd.socialLinks?.instagram && (
+                      <a
+                        href={currentAd.socialLinks.instagram}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="Instagram"
+                      >
+                        <InstagramIcon className="w-5 h-5" />
+                      </a>
+                    )}
+                    {currentAd.socialLinks?.youtube && (
+                      <a
+                        href={currentAd.socialLinks.youtube}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[#FF0000] hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="YouTube"
+                      >
+                        <YoutubeIcon className="w-5 h-5" />
+                      </a>
+                    )}
+                    {currentAd.socialLinks?.twitter && (
+                      <a
+                        href={currentAd.socialLinks.twitter}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-slate-900 hover:text-black hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="Twitter / X"
+                      >
+                        <TwitterIcon className="w-4.5 h-4.5" />
+                      </a>
+                    )}
+                    {currentAd.socialLinks?.website && (
+                      <a
+                        href={currentAd.socialLinks.website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-amber-600 hover:text-amber-500 hover:scale-120 transition-all duration-200 cursor-pointer flex items-center"
+                        title="Website"
+                      >
+                        <Globe className="w-5 h-5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
               )}
-              {currentAd.socialLinks?.facebook && (
-                <a
-                  href={currentAd.socialLinks.facebook}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 text-[#1877F2] hover:scale-115 transition duration-200 cursor-pointer"
-                  title="Facebook"
-                >
-                  <FacebookIcon className="w-6 h-6" />
-                </a>
-              )}
-              {currentAd.socialLinks?.instagram && (
-                <a
-                  href={currentAd.socialLinks.instagram}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 hover:scale-115 transition duration-200 cursor-pointer"
-                  title="Instagram"
-                >
-                  <InstagramIcon className="w-6 h-6" />
-                </a>
-              )}
-              {currentAd.socialLinks?.youtube && (
-                <a
-                  href={currentAd.socialLinks.youtube}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 text-[#FF0000] hover:scale-115 transition duration-200 cursor-pointer"
-                  title="YouTube"
-                >
-                  <YoutubeIcon className="w-6 h-6" />
-                </a>
-              )}
-              {currentAd.socialLinks?.twitter && (
-                <a
-                  href={currentAd.socialLinks.twitter}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 text-slate-900 hover:text-black hover:scale-115 transition duration-200 cursor-pointer"
-                  title="Twitter / X"
-                >
-                  <TwitterIcon className="w-5.5 h-5.5" />
-                </a>
-              )}
-              {currentAd.socialLinks?.website && (
-                <a
-                  href={currentAd.socialLinks.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-1 text-amber-600 hover:text-amber-500 hover:scale-115 transition duration-200 cursor-pointer"
-                  title="Website"
-                >
-                  <Globe className="w-6 h-6" />
-                </a>
-              )}
+
             </div>
 
             {/* Slide Pagination Indicators (Right Side) */}
