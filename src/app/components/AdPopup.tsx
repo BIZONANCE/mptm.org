@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { X, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Globe, ChevronLeft, ChevronRight, Phone, MapPin } from "lucide-react";
 
 export interface SocialLinks {
+  phone?: string;
+  visitUs?: string;
   whatsapp?: string;
   facebook?: string;
   instagram?: string;
@@ -36,6 +38,8 @@ const DEFAULT_DEMO_ADS: AdItem[] = [
     imageUrl: "/mptmm.png",
     adLink: "https://mptmamravati.org/registration",
     socialLinks: {
+      phone: "+919876543210",
+      visitUs: "https://mptmamravati.org/contact-us",
       whatsapp: "https://wa.me/919876543210?text=Hello%20MPTM%20Amravati",
       facebook: "https://facebook.com",
       instagram: "https://instagram.com",
@@ -55,6 +59,8 @@ const DEFAULT_DEMO_ADS: AdItem[] = [
     imageUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     adLink: "https://mptmamravati.org",
     socialLinks: {
+      phone: "+919876543210",
+      visitUs: "https://mptmamravati.org/contact-us",
       whatsapp: "https://wa.me/919876543210",
       facebook: "https://facebook.com",
       instagram: "https://instagram.com",
@@ -229,6 +235,8 @@ export default function AdPopup() {
   const ytEmbed = isVideo && mediaSrc ? getYouTubeEmbedUrl(mediaSrc) : null;
 
   const hasSocialLinks =
+    currentAd.socialLinks?.phone ||
+    currentAd.socialLinks?.visitUs ||
     currentAd.socialLinks?.whatsapp ||
     currentAd.socialLinks?.facebook ||
     currentAd.socialLinks?.instagram ||
@@ -356,8 +364,30 @@ export default function AdPopup() {
           {/* Bottom Strip: Social Media Icons + Autoscroll Pagination */}
           <div className="flex items-center justify-between gap-3 py-1 px-1.5 min-h-[38px] w-full shrink-0">
 
-            {/* Social Icons (Left Side) */}
-            <div className="flex items-center justify-start gap-3">
+            {/* Social & Action Icons (Left Side) */}
+            <div className="flex items-center justify-start gap-2.5 sm:gap-3 flex-wrap">
+              {currentAd.socialLinks?.phone && (
+                <a
+                  href={currentAd.socialLinks.phone.startsWith("tel:") ? currentAd.socialLinks.phone : `tel:${currentAd.socialLinks.phone}`}
+                  className="p-1 text-emerald-600 hover:text-emerald-500 hover:scale-115 transition duration-200 cursor-pointer flex items-center gap-1 group"
+                  title="Call Us"
+                >
+                  <Phone className="w-5.5 h-5.5 sm:w-6 sm:h-6" />
+                  <span className="text-[11px] font-bold text-emerald-700 hidden sm:inline group-hover:underline">Call Us</span>
+                </a>
+              )}
+              {currentAd.socialLinks?.visitUs && (
+                <a
+                  href={currentAd.socialLinks.visitUs}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-1 text-purple-600 hover:text-purple-500 hover:scale-115 transition duration-200 cursor-pointer flex items-center gap-1 group"
+                  title="Visit Us"
+                >
+                  <MapPin className="w-5.5 h-5.5 sm:w-6 sm:h-6" />
+                  <span className="text-[11px] font-bold text-purple-700 hidden sm:inline group-hover:underline">Visit Us</span>
+                </a>
+              )}
               {currentAd.socialLinks?.whatsapp && (
                 <a
                   href={currentAd.socialLinks.whatsapp}

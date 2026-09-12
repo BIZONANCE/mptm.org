@@ -21,7 +21,8 @@ const devanagari = Noto_Sans_Devanagari({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mptm-org.vercel.app";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://mptmamravati.org";
 
 export const viewport: Viewport = {
   themeColor: "#4A0404",
