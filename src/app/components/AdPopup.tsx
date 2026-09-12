@@ -321,7 +321,7 @@ export default function AdPopup() {
                     src={mediaSrc}
                     alt={currentAd.title || "Advertisement"}
                     onLoad={handleImgLoad}
-                    className="max-h-[75vh] w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-[1.01] rounded-xl block mx-auto"
+                    className="max-h-[75vh] w-full h-auto object-contain rounded-xl block mx-auto"
                   />
                 </a>
               ) : (
