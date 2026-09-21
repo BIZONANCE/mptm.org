@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 
 interface ContactInfoData {
   address: string;
@@ -22,6 +23,8 @@ export default function ContactUs() {
     name: "",
     email: "",
     phone: "",
+    city: "अमरावती",
+    district: "अमरावती",
     subject: "",
     message: "",
   });
@@ -107,6 +110,8 @@ export default function ContactUs() {
       name: "",
       email: "",
       phone: "",
+      city: "अमरावती",
+      district: "अमरावती",
       subject: "",
       message: "",
     });
@@ -395,6 +400,87 @@ export default function ContactUs() {
                       placeholder="१० अंकी मोबाईल नंबर (उदा. 9876543210)"
                       className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 font-mono outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                     />
+                  </div>
+
+                  {/* District and City Dropdowns */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="district"
+                        className="block text-sm font-semibold text-gray-700 mb-1.5"
+                      >
+                        जिल्हा
+                      </label>
+                      <select
+                        id="district"
+                        name="district"
+                        value={formData.district}
+                        onChange={(e) => {
+                          const newDist = e.target.value;
+                          const cities = getCityOptions(newDist, "mr");
+                          setFormData((prev) => ({
+                            ...prev,
+                            district: newDist,
+                            city: cities[0] || "",
+                          }));
+                        }}
+                        className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      >
+                        {getDistrictOptions("mr").map((d) => (
+                          <option key={d} value={d}>
+                            {d}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {(() => {
+                      const cityOpts = getCityOptions(formData.district, "mr");
+                      const isCustomCity = formData.city && !cityOpts.includes(formData.city) && formData.city !== "OTHER";
+                      const selectValue = isCustomCity ? "OTHER" : formData.city;
+
+                      return (
+                        <div>
+                          <label
+                            htmlFor="city"
+                            className="block text-sm font-semibold text-gray-700 mb-1.5"
+                          >
+                            शहर / गाव
+                          </label>
+                          <select
+                            id="city"
+                            value={selectValue}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === "OTHER") {
+                                setFormData((prev) => ({ ...prev, city: "" }));
+                              } else {
+                                setFormData((prev) => ({ ...prev, city: val }));
+                              }
+                            }}
+                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                          >
+                            {cityOpts.map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                            <option value="OTHER">इतर (इथे नाव लिहा...)</option>
+                          </select>
+
+                          {(selectValue === "OTHER" || isCustomCity) && (
+                            <input
+                              type="text"
+                              name="city"
+                              value={formData.city}
+                              onChange={handleInputChange}
+                              placeholder="आपल्या शहराचे / गावाचे नाव लिहा"
+                              className="w-full mt-2 rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Subject */}

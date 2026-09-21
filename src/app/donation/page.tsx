@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Phone, QrCode, Printer, CheckCircle, Upload, RefreshCw } from "lucide-react";
+import { ArrowLeft, Phone, QrCode, Printer, CheckCircle, Upload, RefreshCw, Download } from "lucide-react";
+import { downloadReceiptAsPdf } from "@/utils/pdfUtils";
+import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 
 // Convert numeric amount to Marathi words automatically for any donation amount
 function convertNumberToMarathiWords(amountStr: string): string {
@@ -59,6 +61,7 @@ export default function DonationPage() {
     const [name, setName] = useState("");
     const [mobileNo, setMobileNo] = useState("");
     const [city, setCity] = useState("");
+    const [district, setDistrict] = useState("अमरावती");
     const [amount, setAmount] = useState("");
     const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
     const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
@@ -100,6 +103,7 @@ export default function DonationPage() {
         setName("");
         setMobileNo("");
         setCity("");
+        setDistrict("अमरावती");
         setAmount("");
         setPaymentScreenshot(null);
         setScreenshotPreview(null);
@@ -149,6 +153,7 @@ export default function DonationPage() {
                     name: name.trim(),
                     mobileNo: mobileNo.trim(),
                     city: city.trim(),
+                    district: district.trim(),
                     amount: parseInt(amount, 10),
                     amountInWords: amountWords,
                     paymentScreenshot: screenshotPreview,
@@ -178,8 +183,19 @@ export default function DonationPage() {
         }
     };
 
+    const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
+
     const handlePrint = () => {
         window.print();
+    };
+
+    const handleDownloadPdf = async () => {
+        try {
+            setDownloadingPdf(true);
+            await downloadReceiptAsPdf("printable-receipt-card", `Donation_Receipt_${receiptNo || "MPTM"}.pdf`);
+        } finally {
+            setDownloadingPdf(false);
+        }
     };
 
     const inputBaseStyle =
@@ -283,19 +299,73 @@ export default function DonationPage() {
                                         />
                                     </div>
 
-                                    {/* City Input */}
-                                    <div className="space-y-1">
-                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                            शहर / गाव <span className="text-red-600">*</span> :
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={city}
-                                            onChange={(e) => setCity(e.target.value)}
-                                            required
-                                            placeholder="तुमचे शहर किंवा गाव प्रविष्ट करा"
-                                            className={inputBaseStyle}
-                                        />
+                                    {/* District & City Dropdowns */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                जिल्हा <span className="text-red-600">*</span> :
+                                            </label>
+                                            <select
+                                                value={district}
+                                                onChange={(e) => {
+                                                    const newDist = e.target.value;
+                                                    setDistrict(newDist);
+                                                    const cities = getCityOptions(newDist, "mr");
+                                                    setCity(cities[0] || "");
+                                                }}
+                                                className={inputBaseStyle}
+                                            >
+                                                {getDistrictOptions("mr").map((d) => (
+                                                    <option key={d} value={d}>
+                                                        {d}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {(() => {
+                                            const cityOpts = getCityOptions(district, "mr");
+                                            const isCustomCity = city && !cityOpts.includes(city) && city !== "OTHER";
+                                            const selectValue = isCustomCity ? "OTHER" : city;
+
+                                            return (
+                                                <div className="space-y-1">
+                                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                        शहर / गाव <span className="text-red-600">*</span> :
+                                                    </label>
+                                                    <select
+                                                        value={selectValue}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            if (val === "OTHER") {
+                                                                setCity("");
+                                                            } else {
+                                                                setCity(val);
+                                                            }
+                                                        }}
+                                                        className={inputBaseStyle}
+                                                    >
+                                                        {cityOpts.map((c) => (
+                                                            <option key={c} value={c}>
+                                                                {c}
+                                                            </option>
+                                                        ))}
+                                                        <option value="OTHER">इतर (इथे नाव लिहा...)</option>
+                                                    </select>
+
+                                                    {(selectValue === "OTHER" || isCustomCity) && (
+                                                        <input
+                                                            type="text"
+                                                            value={city}
+                                                            onChange={(e) => setCity(e.target.value)}
+                                                            required
+                                                            placeholder="आपल्या शहराचे / गावाचे नाव लिहा"
+                                                            className={`${inputBaseStyle} mt-1.5`}
+                                                        />
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Amount Input */}
@@ -461,11 +531,21 @@ export default function DonationPage() {
                             <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                                 <button
                                     type="button"
+                                    onClick={handleDownloadPdf}
+                                    disabled={downloadingPdf}
+                                    className="px-4 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                                >
+                                    <Download className={`w-4 h-4 text-blue-200 ${downloadingPdf ? "animate-bounce" : ""}`} />
+                                    <span>{downloadingPdf ? "डाऊनलोड होत आहे..." : "पावती PDF डाऊनलोड करा"}</span>
+                                </button>
+
+                                <button
+                                    type="button"
                                     onClick={handlePrint}
                                     className="px-4 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
                                 >
                                     <Printer className="w-4 h-4 text-emerald-200" />
-                                    <span>पावती प्रिंट / डाऊनलोड करा</span>
+                                    <span>पावती प्रिंट करा</span>
                                 </button>
                                 <button
                                     type="button"
@@ -473,13 +553,13 @@ export default function DonationPage() {
                                     className="px-4 py-2.5 bg-amber-800 hover:bg-amber-900 text-white text-xs sm:text-sm font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer border border-amber-400/40"
                                 >
                                     <RefreshCw className="w-4 h-4 text-amber-300" />
-                                    <span>नवीन देणगी नोंदवा (फॉर्म रिफ्रेश करा)</span>
+                                    <span>नवीन देणगी नोंदवा</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Official Marathi Receipt Card - Printable Format matching Form.tsx */}
-                        <div className="bg-[#FFFDF9] rounded-2xl border-2 border-amber-800/60 p-6 sm:p-8 space-y-6 shadow-2xl relative">
+                        <div id="printable-receipt-card" className="bg-[#FFFDF9] rounded-2xl border-2 border-amber-800/60 p-6 sm:p-8 space-y-6 shadow-2xl relative">
                             
                             {/* Receipt Banner Header */}
                             <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-3 px-4 rounded-xl text-center space-y-0.5 border border-amber-400">
@@ -520,8 +600,8 @@ export default function DonationPage() {
                                 </div>
 
                                 <div className="flex items-center gap-2 border-b border-dashed border-amber-300 pb-2">
-                                    <span className="w-36 text-stone-600 font-semibold">शहर / गाव :</span>
-                                    <span>{city}</span>
+                                    <span className="w-36 text-stone-600 font-semibold">शहर / जिल्हा :</span>
+                                    <span>{city}{district ? `, ${district}` : ""}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2 border-b border-dashed border-amber-300 pb-2">

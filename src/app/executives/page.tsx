@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { downloadReceiptAsPdf } from "@/utils/pdfUtils";
 import {
   ArrowLeft,
   Phone,
@@ -15,6 +16,7 @@ import {
   Printer,
   MessageSquare,
   X,
+  Download,
 } from "lucide-react";
 
 interface ExecutiveMemberItem {
@@ -78,6 +80,18 @@ function ExecutivesContent() {
   const [executives, setExecutives] = useState<ExecutiveMemberItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedViewExec, setSelectedViewExec] = useState<ExecutiveMemberItem | null>(null);
+  const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
+
+  const handleDownloadPdf = async () => {
+    if (!selectedViewExec) return;
+    try {
+      setDownloadingPdf(true);
+      const receiptNo = selectedViewExec.receiptNo || `MPTM-EM-${selectedViewExec.id.replace(/\D/g, "").slice(-4) || "101"}`;
+      await downloadReceiptAsPdf("printable-receipt-card", `Executive_Receipt_${receiptNo}.pdf`);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   const searchParams = useSearchParams();
   const paramReceiptNo = searchParams.get("receiptNo");
@@ -280,7 +294,7 @@ mptmamravati.org`;
         }
       `}</style>
 
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className={`max-w-6xl mx-auto space-y-6 ${selectedViewExec ? "no-print" : ""}`}>
 
         {/* Back Link */}
         <div className="no-print">
@@ -392,7 +406,7 @@ mptmamravati.org`;
 
       {/* OFFICIAL EXECUTIVE MEMBER RECEIPT PDF MODAL */}
       {selectedViewExec && (
-        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto no-print">
+        <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div className="bg-[#FFFDF9] rounded-2xl shadow-2xl max-w-3xl w-full overflow-hidden border-2 border-amber-800/40 animate-in fade-in zoom-in-95 duration-200 my-auto font-sans">
 
             {/* Modal Top Header */}
@@ -418,7 +432,17 @@ mptmamravati.org`;
                   title="Send Receipt to WhatsApp"
                 >
                   <MessageSquare className="w-4 h-4" />
-                  <span>WhatsApp</span>
+                  <span className="hidden sm:inline">WhatsApp</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer disabled:opacity-50"
+                  title="Download Receipt PDF file"
+                >
+                  <Download className={`w-4 h-4 ${downloadingPdf ? "animate-bounce" : ""}`} />
+                  <span>{downloadingPdf ? "Downloading..." : "Download PDF"}</span>
                 </button>
 
                 <button
@@ -426,7 +450,7 @@ mptmamravati.org`;
                   className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-amber-950 font-extrabold text-xs flex items-center gap-1.5 shadow-md transition cursor-pointer"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Print PDF</span>
+                  <span className="hidden sm:inline">Print PDF</span>
                 </button>
 
                 <button

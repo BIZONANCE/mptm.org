@@ -8,11 +8,14 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
+import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 
 type FormState = {
   name: string;
   email: string;
   phone: string;
+  city: string;
+  district: string;
   message: string;
   resume: File | null;
 };
@@ -27,6 +30,8 @@ export default function CareerPage() {
     name: "",
     email: "",
     phone: "",
+    city: "Amravati",
+    district: "Amravati",
     message: "",
     resume: null,
   });
@@ -86,6 +91,8 @@ export default function CareerPage() {
           name: formData.name,
           email: formData.email,
           phone: formData.phone,
+          city: formData.city,
+          district: formData.district,
           message: formData.message,
           resumeName: formData.resume ? formData.resume.name : "Resume.pdf",
           resumeData: resumeBase64 || undefined,
@@ -114,6 +121,8 @@ export default function CareerPage() {
       name: "",
       email: "",
       phone: "",
+      city: "Amravati",
+      district: "Amravati",
       message: "",
       resume: null,
     });
@@ -217,6 +226,79 @@ export default function CareerPage() {
                 className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent font-mono transition"
                 placeholder="10-Digit Mobile Number (e.g. 9876543210)"
               />
+            </div>
+
+            {/* District and City Dropdowns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  District
+                </label>
+                <select
+                  name="district"
+                  value={formData.district}
+                  onChange={(e) => {
+                    const newDist = e.target.value;
+                    const cities = getCityOptions(newDist, "en");
+                    setFormData((prev) => ({
+                      ...prev,
+                      district: newDist,
+                      city: cities[0] || "",
+                    }));
+                  }}
+                  className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                >
+                  {getDistrictOptions("en").map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {(() => {
+                const cityOpts = getCityOptions(formData.district, "en");
+                const isCustomCity = formData.city && !cityOpts.includes(formData.city) && formData.city !== "OTHER";
+                const selectValue = isCustomCity ? "OTHER" : formData.city;
+
+                return (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                      City / Village
+                    </label>
+                    <select
+                      value={selectValue}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "OTHER") {
+                          setFormData((prev) => ({ ...prev, city: "" }));
+                        } else {
+                          setFormData((prev) => ({ ...prev, city: val }));
+                        }
+                      }}
+                      className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                    >
+                      {cityOpts.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                      <option value="OTHER">Other (Specify below...)</option>
+                    </select>
+
+                    {(selectValue === "OTHER" || isCustomCity) && (
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        className="w-full mt-2 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition"
+                        placeholder="Specify city or village name"
+                      />
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Message */}

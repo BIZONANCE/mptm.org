@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 
 interface MainMember {
     srNo: number;
@@ -237,6 +238,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         date: formatDateToDDMMYYYY(new Date()),
         registrationFee: initialFee.toString(),
         address: "",
+        city: "अमरावती",
+        district: "अमरावती",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
         paymentMethod: "UPI",
         otherPaymentMethod: "",
@@ -569,6 +572,16 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             return false;
         }
 
+        if (!formData.city || formData.city.trim() === "") {
+            setScreenshotError(FILL_FORM_FIRST_MSG);
+            return false;
+        }
+
+        if (!formData.district || formData.district.trim() === "") {
+            setScreenshotError(FILL_FORM_FIRST_MSG);
+            return false;
+        }
+
         for (let i = 0; i < mainMembers.length; i++) {
             const m = mainMembers[i];
             if (!m.fullName || m.fullName.trim() === "" || !m.mobileNo || m.mobileNo.length !== 10 || !m.prabhagNo || m.prabhagNo.trim() === "") {
@@ -658,6 +671,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                         date: formatDateToDDMMYYYY(new Date()),
                         registrationFee: "101",
                         address: "",
+                        city: "अमरावती",
+                        district: "अमरावती",
                         amountInWords: "एकशे एक रुपये फक्त",
                         paymentMethod: "UPI",
                         otherPaymentMethod: "",
@@ -705,7 +720,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     return (
         <div className="w-full max-w-5xl mx-auto my-4 sm:my-8 px-3 sm:px-4 font-sans print:my-0 print:p-0 print-page-wrapper">
             {/* Receipt Card Container */}
-            <div className="bg-[#FFFDF9] border-2 border-amber-800/40 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden print:border-amber-800/60 print:shadow-none print:rounded-xl">
+            <div id="printable-receipt-card" className="bg-[#FFFDF9] border-2 border-amber-800/40 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden print:border-amber-800/60 print:shadow-none print:rounded-xl">
 
                 <form onSubmit={handleSubmit}>
                     <table className="w-full border-collapse">
@@ -919,20 +934,97 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                     </div>
                                                 ))}
 
-                                                {/* Common Address Field inside the bottom of the single container box */}
-                                                <div className="flex items-center gap-2 pt-3 border-t-2 border-amber-200">
-                                                    <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                        पत्ता :
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        name="address"
-                                                        value={formData.address}
-                                                        onChange={handleChange}
-                                                        required
-                                                        placeholder="रहिवासी पत्ता प्रविष्ट करा"
-                                                        className={inputBase}
-                                                    />
+                                                {/* Common Address, City & District Fields inside the bottom of the single container box */}
+                                                <div className="space-y-3 pt-3 border-t-2 border-amber-200">
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                            पत्ता :
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="address"
+                                                            value={formData.address}
+                                                            onChange={handleChange}
+                                                            required
+                                                            placeholder="रहिवासी पत्ता प्रविष्ट करा"
+                                                            className={inputBase}
+                                                        />
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                जिल्हा :
+                                                            </label>
+                                                            <select
+                                                                name="district"
+                                                                value={formData.district}
+                                                                onChange={(e) => {
+                                                                    const newDist = e.target.value;
+                                                                    const cities = getCityOptions(newDist, "mr");
+                                                                    setFormData((prev) => ({
+                                                                        ...prev,
+                                                                        district: newDist,
+                                                                        city: cities[0] || "",
+                                                                    }));
+                                                                }}
+                                                                className={inputBase}
+                                                            >
+                                                                {getDistrictOptions("mr").map((d) => (
+                                                                    <option key={d} value={d}>
+                                                                        {d}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+
+                                                        {(() => {
+                                                            const cityOpts = getCityOptions(formData.district, "mr");
+                                                            const isCustomCity = formData.city && !cityOpts.includes(formData.city) && formData.city !== "OTHER";
+                                                            const selectValue = isCustomCity ? "OTHER" : formData.city;
+
+                                                            return (
+                                                                <div className="flex flex-col gap-1.5 flex-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                            शहर / गाव :
+                                                                        </label>
+                                                                        <select
+                                                                            value={selectValue}
+                                                                            onChange={(e) => {
+                                                                                const val = e.target.value;
+                                                                                if (val === "OTHER") {
+                                                                                    setFormData((prev) => ({ ...prev, city: "" }));
+                                                                                } else {
+                                                                                    setFormData((prev) => ({ ...prev, city: val }));
+                                                                                }
+                                                                            }}
+                                                                            className={inputBase}
+                                                                        >
+                                                                            {cityOpts.map((c) => (
+                                                                                <option key={c} value={c}>
+                                                                                    {c}
+                                                                                </option>
+                                                                            ))}
+                                                                            <option value="OTHER">इतर (इथे नाव लिहा...)</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    {(selectValue === "OTHER" || isCustomCity) && (
+                                                                        <input
+                                                                            type="text"
+                                                                            name="city"
+                                                                            value={formData.city}
+                                                                            onChange={handleChange}
+                                                                            required
+                                                                            placeholder="आपल्या शहराचे / गावाचे नाव लिहा"
+                                                                            className={inputBase}
+                                                                        />
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
