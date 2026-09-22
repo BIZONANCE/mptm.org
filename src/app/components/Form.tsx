@@ -238,8 +238,13 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         date: formatDateToDDMMYYYY(new Date()),
         registrationFee: initialFee.toString(),
         address: "",
+        gaav: "",
+        taluka: "",
         city: "अमरावती",
         district: "अमरावती",
+        state: "महाराष्ट्र",
+        country: "भारत",
+        pincode: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
         paymentMethod: "UPI",
         otherPaymentMethod: "",
@@ -671,8 +676,13 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                         date: formatDateToDDMMYYYY(new Date()),
                         registrationFee: "101",
                         address: "",
+                        gaav: "",
+                        taluka: "",
                         city: "अमरावती",
                         district: "अमरावती",
+                        state: "महाराष्ट्र",
+                        country: "भारत",
+                        pincode: "",
                         amountInWords: "एकशे एक रुपये फक्त",
                         paymentMethod: "UPI",
                         otherPaymentMethod: "",
@@ -934,7 +944,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                     </div>
                                                 ))}
 
-                                                {/* Common Address, City & District Fields inside the bottom of the single container box */}
+                                                {/* Common Address & Location Input Fields (No Dropdowns) */}
                                                 <div className="space-y-3 pt-3 border-t-2 border-amber-200">
                                                     <div className="flex items-center gap-2">
                                                         <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
@@ -951,79 +961,108 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         />
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                गाव :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="gaav"
+                                                                value={formData.gaav}
+                                                                onChange={handleChange}
+                                                                placeholder="गावाचे नाव प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                तालुका :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="taluka"
+                                                                value={formData.taluka}
+                                                                onChange={handleChange}
+                                                                placeholder="तालुक्याचे नाव प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
+
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                शहर / गाव :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="city"
+                                                                value={formData.city}
+                                                                onChange={handleChange}
+                                                                placeholder="शहर / गावाचे नाव प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                 जिल्हा :
                                                             </label>
-                                                            <select
+                                                            <input
+                                                                type="text"
                                                                 name="district"
                                                                 value={formData.district}
-                                                                onChange={(e) => {
-                                                                    const newDist = e.target.value;
-                                                                    const cities = getCityOptions(newDist, "mr");
-                                                                    setFormData((prev) => ({
-                                                                        ...prev,
-                                                                        district: newDist,
-                                                                        city: cities[0] || "",
-                                                                    }));
-                                                                }}
+                                                                onChange={handleChange}
+                                                                placeholder="जिल्ह्याचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
-                                                            >
-                                                                {getDistrictOptions("mr").map((d) => (
-                                                                    <option key={d} value={d}>
-                                                                        {d}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
+                                                            />
                                                         </div>
 
-                                                        {(() => {
-                                                            const cityOpts = getCityOptions(formData.district, "mr");
-                                                            const isCustomCity = formData.city && !cityOpts.includes(formData.city) && formData.city !== "OTHER";
-                                                            const selectValue = isCustomCity ? "OTHER" : formData.city;
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                राज्य :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="state"
+                                                                value={formData.state}
+                                                                onChange={handleChange}
+                                                                placeholder="राज्याचे नाव प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
 
-                                                            return (
-                                                                <div className="flex flex-col gap-1.5 flex-1">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                            शहर / गाव :
-                                                                        </label>
-                                                                        <select
-                                                                            value={selectValue}
-                                                                            onChange={(e) => {
-                                                                                const val = e.target.value;
-                                                                                if (val === "OTHER") {
-                                                                                    setFormData((prev) => ({ ...prev, city: "" }));
-                                                                                } else {
-                                                                                    setFormData((prev) => ({ ...prev, city: val }));
-                                                                                }
-                                                                            }}
-                                                                            className={inputBase}
-                                                                        >
-                                                                            {cityOpts.map((c) => (
-                                                                                <option key={c} value={c}>
-                                                                                    {c}
-                                                                                </option>
-                                                                            ))}
-                                                                            <option value="OTHER">इतर (इथे नाव लिहा...)</option>
-                                                                        </select>
-                                                                    </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                देश :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                name="country"
+                                                                value={formData.country}
+                                                                onChange={handleChange}
+                                                                placeholder="देशाचे नाव प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
 
-                                                                    {(selectValue === "OTHER" || isCustomCity) && (
-                                                                        <input
-                                                                            type="text"
-                                                                            name="city"
-                                                                            value={formData.city}
-                                                                            onChange={handleChange}
-                                                                            required
-                                                                            placeholder="आपल्या शहराचे / गावाचे नाव लिहा"
-                                                                            className={inputBase}
-                                                                        />
-                                                                    )}
-                                                                </div>
-                                                            );
-                                                        })()}
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
+                                                                पिनकोड :
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                inputMode="numeric"
+                                                                maxLength={6}
+                                                                name="pincode"
+                                                                value={formData.pincode}
+                                                                onChange={handleChange}
+                                                                placeholder="६ अंकी पिनकोड प्रविष्ट करा"
+                                                                className={inputBase}
+                                                            />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
