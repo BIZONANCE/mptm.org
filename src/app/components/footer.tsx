@@ -1,17 +1,28 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
     <footer className="bg-[#FDFBF7] text-amber-100 border-t border-amber-500/30 py-4 print:hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Left Side: Organization Title & Copyright */}
-        <div className="text-center sm:text-left">
+        <div className="text-center md:text-left">
           <p className="text-sm sm:text-base font-bold text-[#4A0404]">
             महाराष्ट्र प्रांतिक तैलिक महासभा - अमरावती विभाग अमरावती.
           </p>
           <p className="text-xs text-[#4A0404] mt-0.5">
             © {new Date().getFullYear()} सर्व हक्क सुरक्षित
           </p>
+        </div>
+
+        {/* Center: Privacy Policy Link */}
+        <div className="text-center">
+          <Link
+            href="/privacy-policy"
+            className="text-xs sm:text-sm font-bold text-[#7A0C0C] hover:text-amber-800 underline transition-colors"
+          >
+            Privacy Policy
+          </Link>
         </div>
 
         {/* Right Side: Developed by Bizonance Logo Link */}
