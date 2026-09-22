@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Phone, QrCode, Printer, CheckCircle, Upload, RefreshCw, Download } from "lucide-react";
 import { downloadReceiptAsPdf } from "@/utils/pdfUtils";
-import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 
 // Convert numeric amount to Marathi words automatically for any donation amount
 function convertNumberToMarathiWords(amountStr: string): string {
@@ -60,8 +59,14 @@ function convertNumberToMarathiWords(amountStr: string): string {
 export default function DonationPage() {
     const [name, setName] = useState("");
     const [mobileNo, setMobileNo] = useState("");
-    const [city, setCity] = useState("");
+    const [address, setAddress] = useState("");
+    const [gaav, setGaav] = useState("");
+    const [taluka, setTaluka] = useState("");
+    const [city, setCity] = useState("अमरावती");
     const [district, setDistrict] = useState("अमरावती");
+    const [state, setState] = useState("महाराष्ट्र");
+    const [country, setCountry] = useState("भारत");
+    const [pincode, setPincode] = useState("");
     const [amount, setAmount] = useState("");
     const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
     const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
@@ -102,8 +107,14 @@ export default function DonationPage() {
     const handleResetForm = () => {
         setName("");
         setMobileNo("");
-        setCity("");
+        setAddress("");
+        setGaav("");
+        setTaluka("");
+        setCity("अमरावती");
         setDistrict("अमरावती");
+        setState("महाराष्ट्र");
+        setCountry("भारत");
+        setPincode("");
         setAmount("");
         setPaymentScreenshot(null);
         setScreenshotPreview(null);
@@ -132,7 +143,7 @@ export default function DonationPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name.trim() || !mobileNo.trim() || mobileNo.length !== 10 || !city.trim() || !amount || parseInt(amount, 10) <= 0) {
+        if (!name.trim() || !mobileNo.trim() || mobileNo.length !== 10 || !amount || parseInt(amount, 10) <= 0) {
             alert("कृपया सर्व आवश्यक माहिती अचूक प्रविष्ट करा.");
             return;
         }
@@ -152,8 +163,14 @@ export default function DonationPage() {
                 body: JSON.stringify({
                     name: name.trim(),
                     mobileNo: mobileNo.trim(),
+                    address: address.trim(),
+                    gaav: gaav.trim(),
+                    taluka: taluka.trim(),
                     city: city.trim(),
                     district: district.trim(),
+                    state: state.trim(),
+                    country: country.trim(),
+                    pincode: pincode.trim(),
                     amount: parseInt(amount, 10),
                     amountInWords: amountWords,
                     paymentScreenshot: screenshotPreview,
@@ -299,73 +316,117 @@ export default function DonationPage() {
                                         />
                                     </div>
 
-                                    {/* District & City Dropdowns */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {/* Address Input */}
+                                    <div className="space-y-1">
+                                        <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                            संपूर्ण पत्ता :
+                                        </label>
+                                        <textarea
+                                            rows={2}
+                                            value={address}
+                                            onChange={(e) => setAddress(e.target.value)}
+                                            placeholder="संपूर्ण पत्ता प्रविष्ट करा"
+                                            className={`${inputBaseStyle} resize-none`}
+                                        />
+                                    </div>
+
+                                    {/* Location Input Fields: Gaav, Taluka, City */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         <div className="space-y-1">
                                             <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                                जिल्हा <span className="text-red-600">*</span> :
+                                                गाव :
                                             </label>
-                                            <select
-                                                value={district}
-                                                onChange={(e) => {
-                                                    const newDist = e.target.value;
-                                                    setDistrict(newDist);
-                                                    const cities = getCityOptions(newDist, "mr");
-                                                    setCity(cities[0] || "");
-                                                }}
+                                            <input
+                                                type="text"
+                                                value={gaav}
+                                                onChange={(e) => setGaav(e.target.value)}
+                                                placeholder="गावाचे नाव"
                                                 className={inputBaseStyle}
-                                            >
-                                                {getDistrictOptions("mr").map((d) => (
-                                                    <option key={d} value={d}>
-                                                        {d}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                            />
                                         </div>
 
-                                        {(() => {
-                                            const cityOpts = getCityOptions(district, "mr");
-                                            const isCustomCity = city && !cityOpts.includes(city) && city !== "OTHER";
-                                            const selectValue = isCustomCity ? "OTHER" : city;
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                तालुका :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={taluka}
+                                                onChange={(e) => setTaluka(e.target.value)}
+                                                placeholder="तालुक्याचे नाव"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
 
-                                            return (
-                                                <div className="space-y-1">
-                                                    <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                                        शहर / गाव <span className="text-red-600">*</span> :
-                                                    </label>
-                                                    <select
-                                                        value={selectValue}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            if (val === "OTHER") {
-                                                                setCity("");
-                                                            } else {
-                                                                setCity(val);
-                                                            }
-                                                        }}
-                                                        className={inputBaseStyle}
-                                                    >
-                                                        {cityOpts.map((c) => (
-                                                            <option key={c} value={c}>
-                                                                {c}
-                                                            </option>
-                                                        ))}
-                                                        <option value="OTHER">इतर (इथे नाव लिहा...)</option>
-                                                    </select>
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                शहर / गाव :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={city}
+                                                onChange={(e) => setCity(e.target.value)}
+                                                placeholder="शहर किंवा गाव"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
+                                    </div>
 
-                                                    {(selectValue === "OTHER" || isCustomCity) && (
-                                                        <input
-                                                            type="text"
-                                                            value={city}
-                                                            onChange={(e) => setCity(e.target.value)}
-                                                            required
-                                                            placeholder="आपल्या शहराचे / गावाचे नाव लिहा"
-                                                            className={`${inputBaseStyle} mt-1.5`}
-                                                        />
-                                                    )}
-                                                </div>
-                                            );
-                                        })()}
+                                    {/* Location Input Fields: District, State, Country, Pincode */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                जिल्हा :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={district}
+                                                onChange={(e) => setDistrict(e.target.value)}
+                                                placeholder="जिल्हा"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                राज्य :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={state}
+                                                onChange={(e) => setState(e.target.value)}
+                                                placeholder="राज्य"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                देश :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={country}
+                                                onChange={(e) => setCountry(e.target.value)}
+                                                placeholder="देश"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
+                                                पिनकोड :
+                                            </label>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                maxLength={6}
+                                                value={pincode}
+                                                onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                                                placeholder="६ अंकी पिनकोड"
+                                                className={inputBaseStyle}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Amount Input */}
@@ -599,9 +660,18 @@ export default function DonationPage() {
                                     <span>{mobileNo}</span>
                                 </div>
 
+                                {address && (
+                                    <div className="flex items-start gap-2 border-b border-dashed border-amber-300 pb-2">
+                                        <span className="w-36 text-stone-600 font-semibold">पत्ता :</span>
+                                        <span>{address}</span>
+                                    </div>
+                                )}
+
                                 <div className="flex items-center gap-2 border-b border-dashed border-amber-300 pb-2">
-                                    <span className="w-36 text-stone-600 font-semibold">शहर / जिल्हा :</span>
-                                    <span>{city}{district ? `, ${district}` : ""}</span>
+                                    <span className="w-36 text-stone-600 font-semibold">शहर / गाव :</span>
+                                    <span>
+                                        {[gaav, taluka, city, district, state, country, pincode].filter(Boolean).join(", ") || city || "अमरावती"}
+                                    </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 border-b border-dashed border-amber-300 pb-2">

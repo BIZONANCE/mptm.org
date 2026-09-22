@@ -61,3 +61,43 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Donation {
+  id                String   @id @default(cuid())
+  receiptNo         String   @unique
+  name              String
+  mobileNo          String
+  address           String?
+  gaav              String?
+  taluka            String?
+  city              String?  @default("अमरावती")
+  district          String?  @default("अमरावती")
+  state             String?  @default("महाराष्ट्र")
+  country           String?  @default("भारत")
+  pincode           String?
+  amount            Int
+  amountInWords     String
+  paymentScreenshot String?
+  date              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model ExecutiveMember {
+  id          String   @id @default(cuid())
+  fullName    String
+  designation String
+  mobileNo    String
+  address     String?
+  gaav        String?
+  taluka      String?
+  city        String?  @default("अमरावती")
+  district    String?  @default("अमरावती")
+  state       String?  @default("महाराष्ट्र")
+  country     String?  @default("भारत")
+  pincode     String?
+  photoUrl    String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
