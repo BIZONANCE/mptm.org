@@ -15,13 +15,27 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Center: Privacy Policy Link */}
-        <div className="text-center">
+        {/* Center: Policy Links */}
+        <div className="flex flex-wrap items-center justify-center gap-2.5 text-xs sm:text-sm font-bold text-[#7A0C0C]">
           <Link
             href="/privacy-policy"
-            className="text-xs sm:text-sm font-bold text-[#7A0C0C] hover:text-amber-800 underline transition-colors"
+            className="hover:text-amber-800 underline transition-colors"
           >
             Privacy Policy
+          </Link>
+          <span className="text-amber-700/50 font-normal select-none">•</span>
+          <Link
+            href="/refund-policy"
+            className="hover:text-amber-800 underline transition-colors"
+          >
+            Refund Policy
+          </Link>
+          <span className="text-amber-700/50 font-normal select-none">•</span>
+          <Link
+            href="/terms-and-conditions"
+            className="hover:text-amber-800 underline transition-colors"
+          >
+            Terms & Conditions
           </Link>
         </div>
 
