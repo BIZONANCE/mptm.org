@@ -16,7 +16,7 @@ export default function TermsAndConditionsPage() {
         </h1>
         
         <p className="text-sm sm:text-base text-slate-700">
-          By using the <strong className="text-slate-900 font-bold">Aaradhya Foundation</strong> website, you agree to the following Terms & Conditions.
+          By using the <strong className="text-slate-900 font-bold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong> website, you agree to the following Terms & Conditions.
         </p>
 
         <div className="space-y-3">
@@ -29,7 +29,7 @@ export default function TermsAndConditionsPage() {
               <strong className="text-slate-900 font-semibold">User Obligations:</strong> You agree to provide accurate information when making a donation or filling out any forms on the website.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">Content Ownership:</strong> All content on this website is the intellectual property of <strong className="text-slate-900 font-semibold">Aaradhya Foundation</strong>.
+              <strong className="text-slate-900 font-semibold">Content Ownership:</strong> All content on this website is the intellectual property of <strong className="text-slate-900 font-semibold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong>.
             </li>
             <li>
               <strong className="text-slate-900 font-semibold">Prohibited Activities:</strong> You are prohibited from using the website for unlawful activities.

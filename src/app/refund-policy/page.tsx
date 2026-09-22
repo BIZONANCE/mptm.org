@@ -16,7 +16,7 @@ export default function RefundPolicyPage() {
         </h1>
         
         <p className="text-sm sm:text-base text-slate-700">
-          At <strong className="text-slate-900 font-bold">Aaradhya Foundation</strong>, we ensure transparency in the use of donor funds. Please review our Refund Policy below:
+          At <strong className="text-slate-900 font-bold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong>, we ensure transparency in the use of donor funds. Please review our Refund Policy below:
         </p>
 
         <div className="space-y-3">
@@ -37,7 +37,7 @@ export default function RefundPolicyPage() {
         <div className="space-y-3">
           <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Contact for Refunds</h2>
           <p className="text-sm sm:text-base text-slate-700">
-            For any refund-related inquiries, please contact us at <a href="mailto:info@aaradhyafoundation.org.in" className="text-[#7A0C0C] font-semibold underline hover:text-amber-800">info@aaradhyafoundation.org.in</a>.
+            For any refund-related inquiries, please contact us at <a href="mailto:info@mptmamravati.org" className="text-[#7A0C0C] font-semibold underline hover:text-amber-800">info@mptmamravati.org</a>.
           </p>
         </div>
 

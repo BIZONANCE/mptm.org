@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
         </h1>
         
         <p className="text-sm sm:text-base text-slate-700">
-          <strong className="text-slate-900 font-bold">Aaradhya Foundation</strong> is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and disclose your personal information when you visit our website and use our services.
+          <strong className="text-slate-900 font-bold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong> is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and disclose your personal information when you visit our website and use our services.
         </p>
         
         <div className="space-y-3">
@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
               <strong className="text-slate-900 font-semibold">Communication:</strong> We may use your contact details to inform you about our initiatives, campaigns, and newsletters.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">Legal Compliance:</strong> We may disclose your information if required by law or to protect the rights and safety of the Aaradhya Foundation.
+              <strong className="text-slate-900 font-semibold">Legal Compliance:</strong> We may disclose your information if required by law or to protect the rights and safety of the महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.
             </li>
           </ul>
         </div>
