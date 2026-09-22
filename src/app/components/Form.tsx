@@ -961,7 +961,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         />
                                                     </div>
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                         <div className="flex items-center gap-2">
                                                             <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                 गाव :
@@ -986,20 +986,6 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                                 value={formData.taluka}
                                                                 onChange={handleChange}
                                                                 placeholder="तालुक्याचे नाव प्रविष्ट करा"
-                                                                className={inputBase}
-                                                            />
-                                                        </div>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                शहर / गाव :
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                name="city"
-                                                                value={formData.city}
-                                                                onChange={handleChange}
-                                                                placeholder="शहर / गावाचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
                                                         </div>

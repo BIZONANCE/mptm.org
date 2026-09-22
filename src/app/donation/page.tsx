@@ -330,8 +330,8 @@ export default function DonationPage() {
                                         />
                                     </div>
 
-                                    {/* Location Input Fields: Gaav, Taluka, City */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    {/* Location Input Fields: Gaav, Taluka */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div className="space-y-1">
                                             <label className="block text-xs sm:text-sm font-bold text-stone-800">
                                                 गाव :
@@ -354,19 +354,6 @@ export default function DonationPage() {
                                                 value={taluka}
                                                 onChange={(e) => setTaluka(e.target.value)}
                                                 placeholder="तालुक्याचे नाव"
-                                                className={inputBaseStyle}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-1">
-                                            <label className="block text-xs sm:text-sm font-bold text-stone-800">
-                                                शहर / गाव :
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={city}
-                                                onChange={(e) => setCity(e.target.value)}
-                                                placeholder="शहर किंवा गाव"
                                                 className={inputBaseStyle}
                                             />
                                         </div>
@@ -668,9 +655,9 @@ export default function DonationPage() {
                                 )}
 
                                 <div className="flex items-center gap-2 border-b border-dashed border-amber-300 pb-2">
-                                    <span className="w-36 text-stone-600 font-semibold">शहर / गाव :</span>
+                                    <span className="w-36 text-stone-600 font-semibold">गाव / जिल्हा :</span>
                                     <span>
-                                        {[gaav, taluka, city, district, state, country, pincode].filter(Boolean).join(", ") || city || "अमरावती"}
+                                        {[gaav, taluka, district, state, country, pincode].filter(Boolean).join(", ") || district || "अमरावती"}
                                     </span>
                                 </div>
 
