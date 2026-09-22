@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Devanagari } from "next/font/google";
 import Navbar from "@/app/components/navbar";
+import Footer from "@/app/components/footer";
 import upcomingEvents from "@/app/components/UpcomingEvents";
 import ConductedEvents from "./components/ConductedEvents";
 import "./globals.css";
@@ -145,7 +146,10 @@ export default function RootLayout({
       </head>
       <body className={`${devanagari.className} min-h-full flex flex-col bg-[#FDFBF7] text-slate-900`}>
         <Navbar />
-        {children}
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
       </body>
     </html>
   );
