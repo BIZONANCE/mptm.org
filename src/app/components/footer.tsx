@@ -1,22 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#FDFBF7] text-amber-100 border-t border-amber-500/30 py-4 print:hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left Side: Organization Title & Copyright */}
-        <div className="text-center md:text-left">
-          <p className="text-sm sm:text-base font-bold text-[#4A0404]">
-            महाराष्ट्र प्रांतिक तैलिक महासभा - अमरावती विभाग अमरावती.
-          </p>
-          <p className="text-xs text-[#4A0404] mt-0.5">
-            © {new Date().getFullYear()} सर्व हक्क सुरक्षित
-          </p>
-        </div>
-
-        {/* Center: Policy Links */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 text-xs sm:text-sm font-bold text-[#7A0C0C]">
+    <footer className="bg-[#FDFBF7] border-t border-amber-500/30 py-4 print:hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        {/* Policy Links in Center */}
+        <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-bold text-[#7A0C0C]">
           <Link
             href="/privacy-policy"
             className="hover:text-amber-800 underline transition-colors"
@@ -38,26 +27,6 @@ export default function Footer() {
             Terms & Conditions
           </Link>
         </div>
-
-        {/* Right Side: Developed by Bizonance Logo Link */}
-        <a
-          href="https://bizonance.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 text-sm sm:text-base font-bold text-[#4A0404] hover:opacity-90 transition group"
-        >
-          <span className="leading-none flex items-center">Developed by</span>
-          <div className="flex items-center justify-center shrink-0">
-            <Image
-              src="/bizonance.png"
-              alt="Bizonance"
-              width={130}
-              height={32}
-              priority
-              className="h-6 sm:h-7 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
-            />
-          </div>
-        </a>
       </div>
     </footer>
   );
