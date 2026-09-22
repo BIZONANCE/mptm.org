@@ -29,49 +29,6 @@ export interface AdItem {
   updatedAt?: string;
 }
 
-const DEFAULT_DEMO_ADS: AdItem[] = [
-  {
-    id: "ad_101",
-    title: "महाराष्ट्र प्रांतिक तैलिक महासभा – विशेष नोंदणी अभियान २०२६",
-    subtitle: "अमरावती विभागातील सर्व तैलिक बांधवांसाठी महत्त्वाची सूचना",
-    mediaType: "image",
-    imageUrl: "/mptmm.png",
-    adLink: "https://mptmamravati.org/registration",
-    socialLinks: {
-      phone: "+919876543210",
-      visitUs: "https://mptmamravati.org/contact-us",
-      whatsapp: "https://wa.me/919876543210?text=Hello%20MPTM%20Amravati",
-      facebook: "https://facebook.com",
-      instagram: "https://instagram.com",
-      youtube: "https://youtube.com",
-      twitter: "https://x.com",
-      website: "https://mptmamravati.org"
-    },
-    isActive: true,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "ad_102_video_demo",
-    title: "महाराष्ट्र प्रांतिक तैलिक महासभा (व्हीडिओ जाहिरात)",
-    subtitle: "अमरावती विभागातील सर्व तैलिक बांधवांसाठी व्हीडिओ जाहिरात",
-    mediaType: "video",
-    videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    imageUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    adLink: "https://mptmamravati.org",
-    socialLinks: {
-      phone: "+919876543210",
-      visitUs: "https://mptmamravati.org/contact-us",
-      whatsapp: "https://wa.me/919876543210",
-      facebook: "https://facebook.com",
-      instagram: "https://instagram.com",
-      youtube: "https://youtube.com",
-      website: "https://mptmamravati.org"
-    },
-    isActive: true,
-    createdAt: new Date().toISOString()
-  }
-];
-
 // Authentic Real SVG Brand Icons
 const WhatsappIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -116,7 +73,7 @@ const TwitterIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
 );
 
 export default function AdPopup() {
-  const [ads, setAds] = useState<AdItem[]>(DEFAULT_DEMO_ADS);
+  const [ads, setAds] = useState<AdItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -140,8 +97,8 @@ export default function AdPopup() {
         const res = await fetch(`${API_URL}/api/ads/active`);
         const contentType = res.headers.get("content-type") || "";
         if (!res.ok || !contentType.includes("application/json")) {
-          setAds(DEFAULT_DEMO_ADS);
-          setIsOpen(true);
+          setAds([]);
+          setIsOpen(false);
           return;
         }
         const data = await res.json();
@@ -150,13 +107,13 @@ export default function AdPopup() {
           setCurrentIndex(0);
           setIsOpen(true);
         } else {
-          setAds(DEFAULT_DEMO_ADS);
-          setIsOpen(true);
+          setAds([]);
+          setIsOpen(false);
         }
       } catch (err) {
         console.error("Fetch pop-up ads error:", err);
-        setAds(DEFAULT_DEMO_ADS);
-        setIsOpen(true);
+        setAds([]);
+        setIsOpen(false);
       } finally {
         setLoading(false);
       }
