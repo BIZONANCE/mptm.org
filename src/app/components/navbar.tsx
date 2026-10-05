@@ -80,8 +80,13 @@ export default function Navbar() {
               >
                 सदस्य नोंदणी
               </Link>
-
-
+                {/* Donation button - Donation */}
+              <Link
+                href="/donation"
+                className="inline-flex items-center justify-center bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-emerald-400/80 shadow-sm hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
+              >
+                <span>Donation</span>
+              </Link>
 
               {/* Login Button - Direct link to Admin portal */}
               <a

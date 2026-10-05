@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Information We Collect</h2>
           <ul className="list-disc pl-6 space-y-2 text-sm sm:text-base text-slate-700">
             <li>
-              <strong className="text-slate-900 font-semibold">Personal Information:</strong> We collect your name, email address, phone number, and payment details when you donate through our website.
+              <strong className="text-slate-900 font-semibold">Personal Information:</strong> We collect your name, email address, phone number, and payment details when you register or use services through our website.
             </li>
             <li>
               <strong className="text-slate-900 font-semibold">Non-Personal Information:</strong> We collect anonymous data like your IP address, browser type, and device information to enhance user experience.
@@ -35,10 +35,10 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">How We Use Your Information</h2>
           <ul className="list-disc pl-6 space-y-2 text-sm sm:text-base text-slate-700">
             <li>
-              <strong className="text-slate-900 font-semibold">To Process Donations:</strong> We use your personal information to process and acknowledge donations made through our website.
+              <strong className="text-slate-900 font-semibold">To Process Services & Memberships:</strong> We use your personal information to process membership registrations, requests, and transactions made through our website.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">Communication:</strong> We may use your contact details to inform you about our initiatives, campaigns, and newsletters.
+              <strong className="text-slate-900 font-semibold">Communication:</strong> We may use your contact details to inform you about our initiatives, updates, announcements, and newsletters.
             </li>
             <li>
               <strong className="text-slate-900 font-semibold">Legal Compliance:</strong> We may disclose your information if required by law or to protect the rights and safety of the महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.

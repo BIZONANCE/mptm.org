@@ -26,7 +26,7 @@ export default function TermsAndConditionsPage() {
               <strong className="text-slate-900 font-semibold">Eligibility:</strong> The website is available to all individuals who can form legally binding contracts under applicable law.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">User Obligations:</strong> You agree to provide accurate information when making a donation or filling out any forms on the website.
+              <strong className="text-slate-900 font-semibold">User Obligations:</strong> You agree to provide accurate information when registering or filling out any forms on the website.
             </li>
             <li>
               <strong className="text-slate-900 font-semibold">Content Ownership:</strong> All content on this website is the intellectual property of <strong className="text-slate-900 font-semibold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong>.
@@ -38,13 +38,13 @@ export default function TermsAndConditionsPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Donations</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Payments & Registration</h2>
           <ul className="list-disc pl-6 space-y-2 text-sm sm:text-base text-slate-700">
             <li>
-              <strong className="text-slate-900 font-semibold">Purpose of Donations:</strong> All donations are used to support our mission.
+              <strong className="text-slate-900 font-semibold">Purpose of Payments:</strong> All registration and membership fees are used to support organizational activities and services.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">Payment Methods:</strong> We accept donations via secure payment methods.
+              <strong className="text-slate-900 font-semibold">Payment Methods:</strong> We accept payments via secure payment methods and gateways.
             </li>
           </ul>
         </div>

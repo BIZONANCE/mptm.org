@@ -3,7 +3,7 @@ import React from "react";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
-  description: "Refund Policy for donations and payments.",
+  description: "Refund Policy for registration and service payments.",
 };
 
 export default function RefundPolicyPage() {
@@ -16,17 +16,17 @@ export default function RefundPolicyPage() {
         </h1>
         
         <p className="text-sm sm:text-base text-slate-700">
-          At <strong className="text-slate-900 font-bold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong>, we ensure transparency in the use of donor funds. Please review our Refund Policy below:
+          At <strong className="text-slate-900 font-bold">महाराष्ट्र प्रांतिक तैलिक महासभा अमरावती विभाग, अमरावती.</strong>, we ensure transparency in all user transactions and services. Please review our Refund Policy below:
         </p>
 
         <div className="space-y-3">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Donation Refunds</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Payment & Fee Refunds</h2>
           <ul className="list-disc pl-6 space-y-2 text-sm sm:text-base text-slate-700">
             <li>
-              <strong className="text-slate-900 font-semibold">Refund Requests:</strong> If you made a donation in error, you may request a refund within <strong className="text-slate-900 font-bold">7 days</strong> of the donation.
+              <strong className="text-slate-900 font-semibold">Refund Requests:</strong> If you made a registration or fee payment in error, you may request a refund within <strong className="text-slate-900 font-bold">7 days</strong> of the transaction.
             </li>
             <li>
-              <strong className="text-slate-900 font-semibold">Non-Refundable Donations:</strong> Donations made after 7 days are non-refundable.
+              <strong className="text-slate-900 font-semibold">Non-Refundable Payments:</strong> Payments made after 7 days or after services/memberships have been activated are non-refundable.
             </li>
             <li>
               <strong className="text-slate-900 font-semibold">Processing Refunds:</strong> Approved refunds will be credited within <strong className="text-slate-900 font-bold">7-10 business days</strong>.
