@@ -37,7 +37,7 @@ export default function RefundPolicyPage() {
         <div className="space-y-3">
           <h2 className="text-xl sm:text-2xl font-bold text-[#4A0404]">Contact for Refunds</h2>
           <p className="text-sm sm:text-base text-slate-700">
-            For any refund-related inquiries, please contact us at <a href="mailto:mptmamravati@gmail.com" className="text-[#7A0C0C] font-semibold underline hover:text-amber-800">info@mptmamravati.org</a>.
+            For any refund-related inquiries, please contact us at <a href="mailto:mptmamravati@gmail.com" className="text-[#7A0C0C] font-semibold underline hover:text-amber-800">mptmamravati@gmail.com</a>.
           </p>
         </div>
 
