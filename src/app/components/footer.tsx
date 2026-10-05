@@ -14,17 +14,17 @@ export default function Footer() {
           </Link>
           <span className="text-amber-700/50 font-normal select-none">•</span>
           <Link
-            href="/refund-policy"
-            className="hover:text-amber-800 underline transition-colors"
-          >
-            Refund Policy
-          </Link>
-          <span className="text-amber-700/50 font-normal select-none">•</span>
-          <Link
             href="/terms-and-conditions"
             className="hover:text-amber-800 underline transition-colors"
           >
             Terms & Conditions
+          </Link>
+          <span className="text-amber-700/50 font-normal select-none">•</span>
+          <Link
+            href="/refund-policy"
+            className="hover:text-amber-800 underline transition-colors"
+          >
+            Refund Policy
           </Link>
         </div>
       </div>
