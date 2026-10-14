@@ -3,9 +3,14 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-[#FDFBF7] border-t border-amber-500/30 py-4 print:hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        {/* Policy Links in Center */}
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-bold text-[#7A0C0C]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+        {/* Managed By */}
+        <div className="text-xs sm:text-sm font-semibold text-[#7A0C0C] tracking-wide">
+          Managed By - Rajas Balkrushna Gulwade
+        </div>
+
+        {/* Policy Links on the Right */}
+        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 text-xs sm:text-sm font-bold text-[#7A0C0C]">
           <Link
             href="/privacy-policy"
             className="hover:text-amber-800 underline transition-colors"
