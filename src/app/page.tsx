@@ -79,14 +79,22 @@ export default function Home() {
               आणि मदत कार्यक्रम राबवले जातात.
             </p>
 
-            <p className="text-slate-700 leading-7 mb-6">
+            <p className="text-slate-700 leading-7 mb-5">
               आमचा उद्देश समाजातील प्रत्येक घटकाला सक्षम बनवणे आणि त्यांना
               मुख्य प्रवाहात आणणे हा आहे. सामाजिक बांधिलकी जपत संस्था
               निरंतर कार्यरत आहे.
             </p>
 
+            {/* Membership Fee */}
+            <h3
+              className="text-xl sm:text-2xl font-bold text-[#4A0404] mb-6"
+              style={{ fontFamily: "'Tiro Devanagari Marathi', 'Baloo 2', 'Noto Sans Devanagari', serif" }}
+            >
+              मेंबरशिप फी : ₹ १०१/-
+            </h3>
+
             {/* Registration CTA Button */}
-            <div className="pt-2">
+            <div>
               <Link
                 href="/registration"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4A0404] via-[#6d0909] to-[#4A0404] hover:from-amber-600 hover:via-amber-500 hover:to-amber-600 text-white font-extrabold text-base sm:text-lg px-6 py-3.5 rounded-full border-2 border-amber-400 shadow-lg hover:shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all duration-300"

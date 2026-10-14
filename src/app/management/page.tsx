@@ -332,55 +332,55 @@ const managementData = [
     ),
   },
   {
-  title: "मसुदा व सादरीकरण",
-  content: (
-    <div className="space-y-3">
-      <p>
-        मसुदा दिनांक – १६/०६/२०२६
-      </p>
+    title: "मसुदा व सादरीकरण",
+    content: (
+      <div className="space-y-3">
+        <p>
+          मसुदा दिनांक – १६/०६/२०२६
+        </p>
 
-      <p>
-        प्राथमिक बैठक – ०६/०६/२०२६
-      </p>
+        <p>
+          प्राथमिक बैठक – ०६/०६/२०२६
+        </p>
 
-      <p>
-        द्वितीय बैठक – ०८/०८/२०२६
-      </p>
+        <p>
+          द्वितीय बैठक – ०८/०८/२०२६
+        </p>
 
-      <p>
-        तृतीय बैठक – ११/०८/२०२६
-      </p>
+        <p>
+          तृतीय बैठक – ११/०८/२०२६
+        </p>
 
-      <p>
-        लेखन व सादरीकरण – प्रा. डॉ. इशांत गजानन राजगुरे
-      </p>
+        <p>
+          लेखन व सादरीकरण – प्रा. डॉ. इशांत गजानन राजगुरे
+        </p>
 
-      <p>
-        सर्व मुद्द्यांवर चर्चा करून अंतिम नियमावली व कार्यप्रणाली
-        सादर करण्यात आली.
-      </p>
-    </div>
-  ),
-},
-{
-  title: "मंजुरीसाठी विनंती",
-  content: (
-    <div className="space-y-3">
-      <p>
-        राज्य कार्यकारिणीच्या मार्गदर्शनाखाली अमरावती विभागीय मंडळाची
-        स्वतंत्र घटना म्हणून नियमावली व कार्यआराखडा प्रमाणित करण्यात यावा.
-      </p>
+        <p>
+          सर्व मुद्द्यांवर चर्चा करून अंतिम नियमावली व कार्यप्रणाली
+          सादर करण्यात आली.
+        </p>
+      </div>
+    ),
+  },
+  {
+    title: "मंजुरीसाठी विनंती",
+    content: (
+      <div className="space-y-3">
+        <p>
+          राज्य कार्यकारिणीच्या मार्गदर्शनाखाली अमरावती विभागीय मंडळाची
+          स्वतंत्र घटना म्हणून नियमावली व कार्यआराखडा प्रमाणित करण्यात यावा.
+        </p>
 
-      <p>
-        राज्यस्तरीय प्रतिनिधी – मा.खा. श्री रामदासजी तडस साहेब
-      </p>
+        <p>
+          राज्यस्तरीय प्रतिनिधी – मा.खा. श्री रामदासजी तडस साहेब
+        </p>
 
-      <p>
-        सर्व उपस्थित स्थायी समिती सदस्यांचे मार्गदर्शन व सहकार्य अपेक्षित.
-      </p>
-    </div>
-  ),
-},
+        <p>
+          सर्व उपस्थित स्थायी समिती सदस्यांचे मार्गदर्शन व सहकार्य अपेक्षित.
+        </p>
+      </div>
+    ),
+  },
 
 ];
 
@@ -428,23 +428,39 @@ export default function ManagementPage() {
               प्राथमिक नियमावली व कार्यआराखडा
             </p>
             {/* लेखन व सादरीकरण */}
-<div className="mt-7 mx-auto max-w-xl">
-  <div className="flex items-center justify-center gap-3 mb-3">
-    <div className="h-px w-10 bg-amber-300" />
+            <div className="mt-7 mx-auto max-w-xl">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="h-px w-10 bg-amber-300" />
 
-    <span className="text-xs sm:text-sm font-semibold tracking-wide text-[#8B5A00] uppercase">
-      लेखन व सादरीकरण
-    </span>
+                <span className="text-xs sm:text-sm font-semibold tracking-wide text-[#8B5A00] uppercase">
+                  लेखन व सादरीकरण
+                </span>
 
-    <div className="h-px w-10 bg-amber-300" />
-  </div>
+                <div className="h-px w-10 bg-amber-300" />
+              </div>
 
-  <p className="text-base sm:text-lg font-bold text-[#4A0404]">
-    प्रा. डॉ. इशांत गजानन राजगुरे
-  </p>
+              <p className="text-base sm:text-lg font-bold text-[#4A0404]">
+                प्रा. डॉ. इशांत गजानन राजगुरे
+              </p>
+            </div>
 
-  
-</div>
+            {/* व्यवस्थापन */}
+            <div className="mt-6 mx-auto max-w-xl">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className="h-px w-10 bg-amber-300" />
+
+                <span className="text-xs sm:text-sm font-semibold tracking-wide text-[#8B5A00] uppercase">
+                  व्यवस्थापन
+                </span>
+
+                <div className="h-px w-10 bg-amber-300" />
+              </div>
+
+              <div className="space-y-1 text-base sm:text-lg font-bold text-[#4A0404]">
+                <p>राजस गुलवाडे</p>
+                <p>सौरभ गाडबैल</p>
+              </div>
+            </div>
 
           </div>
 
@@ -457,11 +473,10 @@ export default function ManagementPage() {
               return (
                 <div
                   key={item.title}
-                  className={`border rounded-2xl overflow-hidden bg-white transition-all duration-300 ${
-                    isOpen
+                  className={`border rounded-2xl overflow-hidden bg-white transition-all duration-300 ${isOpen
                       ? "border-amber-300 shadow-md"
                       : "border-amber-100/70 hover:border-amber-200"
-                  }`}
+                    }`}
                 >
 
                   {/* Accordion Button */}
@@ -473,22 +488,20 @@ export default function ManagementPage() {
                   >
 
                     <span
-                      className={`text-sm sm:text-base font-semibold transition-colors duration-300 ${
-                        isOpen
+                      className={`text-sm sm:text-base font-semibold transition-colors duration-300 ${isOpen
                           ? "text-[#4A0404]"
                           : "text-[#111827]"
-                      }`}
+                        }`}
                     >
                       {item.title}
                     </span>
 
                     {/* Arrow Circle */}
                     <div
-                      className={`w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                        isOpen
+                      className={`w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen
                           ? "rotate-180"
                           : "rotate-0"
-                      }`}
+                        }`}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -510,11 +523,10 @@ export default function ManagementPage() {
 
                   {/* Accordion Content */}
                   <div
-                    className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-                      isOpen
+                    className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${isOpen
                         ? "grid-rows-[1fr]"
                         : "grid-rows-[0fr]"
-                    }`}
+                      }`}
                   >
 
                     <div className="overflow-hidden">
@@ -543,5 +555,4 @@ export default function ManagementPage() {
   );
 }
 
-        
-                  
+

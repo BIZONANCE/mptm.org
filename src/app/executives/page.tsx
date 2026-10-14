@@ -120,7 +120,7 @@ function ExecutivesContent() {
         setExecutives([
           {
             id: "exec_101",
-            fullName: "राजस बाळकृष्ण गुळवाडे",
+            fullName: "राजस बाळकृष्ण गुलवाडे",
             designation: "विभागीय अध्यक्ष",
             mobileNo: "9595707707",
             city: "अमरावती",
@@ -152,7 +152,7 @@ function ExecutivesContent() {
       setExecutives([
         {
           id: "exec_101",
-          fullName: "राजस बाळकृष्ण गुळवाडे",
+          fullName: "राजस बाळकृष्ण गुलवाडे",
           designation: "विभागीय अध्यक्ष",
           mobileNo: "9595707707",
           city: "अमरावती",
