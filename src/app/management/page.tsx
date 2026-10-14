@@ -457,8 +457,8 @@ export default function ManagementPage() {
               </div>
 
               <div className="space-y-1 text-base sm:text-lg font-bold text-[#4A0404]">
-                <p>राजस गुलवाडे</p>
-                <p>सौरभ गाडबैल</p>
+                <p>श्री. राजस गुलवाडे</p>
+                <p>श्री. सौरभ गाडबैल</p>
               </div>
             </div>
 
