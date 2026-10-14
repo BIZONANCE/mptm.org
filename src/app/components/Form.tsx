@@ -616,12 +616,13 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             return false;
         }
 
-        if (formData.paymentMethod === "UPI" && !paymentScreenshot) {
-            setScreenshotError(
-                "⚠️ ऑनलाईन देयकासाठी ट्रान्सअॅक्शनचा स्क्रीनशॉट अपलोड करणे अनिवार्य आहे!"
-            );
-            return false;
-        }
+        // Commented out since online payment section is bypassed
+        // if (formData.paymentMethod === "UPI" && !paymentScreenshot) {
+        //     setScreenshotError(
+        //         "⚠️ ऑनलाईन देयकासाठी ट्रान्सअॅक्शनचा स्क्रीनशॉट अपलोड करणे अनिवार्य आहे!"
+        //     );
+        //     return false;
+        // }
 
         setScreenshotError("");
         return true;
@@ -1331,18 +1332,15 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             <span>रोख</span>
                                                         </label>
 
-                                                        {/* Active UPI Radio Input */}
-                                                        <label className="flex items-center gap-1.5 cursor-pointer min-h-[36px]">
-                                                            <input
-                                                                type="radio"
-                                                                name="paymentMethod"
-                                                                value="UPI"
-                                                                checked={formData.paymentMethod === "UPI"}
-                                                                onChange={handleChange}
-                                                                className="w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800"
-                                                            />
-                                                            <span>UPI</span>
-                                                        </label>
+                                                        {/* Pay Now Button (Disabled / Unclickable for now) */}
+                                                        <button
+                                                            type="button"
+                                                            disabled
+                                                            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#7A0C0C] via-[#8c1010] to-[#7A0C0C] text-amber-200 text-xs sm:text-sm font-bold opacity-60 cursor-not-allowed border border-amber-500/40 shadow-xs"
+                                                            title="पेमेंट गेटवे लवकरच उपलब्ध होईल (Pay Now coming soon)"
+                                                        >
+                                                            <span>💳 Pay Now</span>
+                                                        </button>
 
                                                         {/* Inline Cash Payment Confirmation */}
                                                         {formData.paymentMethod === "रोख" && (
@@ -1388,7 +1386,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                 )}
                                             </div>
 
-                                            {/* UPI QR & Upload Section */}
+                                            {/* UPI QR & Upload Section - Skipped / Commented Out */}
+                                            {/*
                                             {formData.paymentMethod === "UPI" && (
                                                 <div className="mt-3 p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-500/60 shadow-lg max-w-sm mx-auto text-center space-y-3 print:hidden">
                                                     <p className="text-xs font-bold text-amber-950 flex items-center justify-center gap-1.5">
@@ -1414,7 +1413,6 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         </p>
                                                     </div>
 
-                                                    {/* Upload Transaction Screenshot Section */}
                                                     <div className="pt-2 border-t border-amber-300/80 space-y-1.5 text-left">
                                                         <label className="block text-xs font-extrabold text-stone-900">
                                                             पेमेंट स्क्रीनशॉट अपलोड करा : <span className="text-red-600">*</span>
@@ -1466,6 +1464,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                     </div>
                                                 </div>
                                             )}
+                                            */}
 
                                             {screenshotError && (
                                                 <div className="p-2.5 rounded-xl bg-red-100 border border-red-400 text-red-900 font-bold text-center text-xs print:hidden">
