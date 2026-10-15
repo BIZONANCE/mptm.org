@@ -83,7 +83,7 @@ export default function DonationPage() {
             if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
             if (host.includes("mptm.org")) return "https://api.mptm.org";
         }
-        return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
+        return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
     };
 
     const API_URL = getApiUrl();
@@ -236,7 +236,7 @@ export default function DonationPage() {
                 {!submitted ? (
                     /* Combined Form & Header Container */
                     <div className="bg-[#FFFDF9] rounded-xl sm:rounded-2xl border-2 border-amber-800/40 shadow-2xl overflow-hidden">
-                        
+
                         {/* Top Traditional Marathi Banner Header matching Form.tsx */}
                         <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-4 px-4 sm:py-5 sm:px-6 relative flex items-center justify-between border-b-2 border-amber-400">
                             <div className="hidden sm:flex items-center gap-1 text-amber-400 text-lg font-bold">
@@ -273,7 +273,7 @@ export default function DonationPage() {
 
                                 {/* Left Side: Donation Form (7 Cols) */}
                                 <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-5">
-                                    
+
                                     <div className="border-b border-amber-300 pb-2 flex flex-col xs:flex-row xs:items-center justify-between gap-2">
                                         <h2 className="text-base sm:text-lg font-bold text-[#7A0C0C] flex items-center gap-2">
                                             <span>📝 देणगीदार माहिती</span>
@@ -444,7 +444,7 @@ export default function DonationPage() {
                                         <label className="block text-xs sm:text-sm font-bold text-stone-800">
                                             पावती / ट्रान्सअॅक्शन स्क्रीनशॉट निवडा <span className="text-red-600">*</span> :
                                         </label>
-                                        
+
                                         <div className="flex flex-col gap-2">
                                             <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2.5 bg-amber-50/60 p-3 rounded-xl border border-amber-300/60">
                                                 <label
@@ -501,11 +501,10 @@ export default function DonationPage() {
                                         <button
                                             type="submit"
                                             disabled={!paymentScreenshot || submitting}
-                                            className={`w-full min-h-[50px] font-extrabold text-base sm:text-lg rounded-full shadow-xl border-2 transition-all flex items-center justify-center gap-2.5 ${
-                                                !paymentScreenshot || submitting
+                                            className={`w-full min-h-[50px] font-extrabold text-base sm:text-lg rounded-full shadow-xl border-2 transition-all flex items-center justify-center gap-2.5 ${!paymentScreenshot || submitting
                                                     ? "bg-stone-200 text-stone-500 border-stone-300 cursor-not-allowed"
                                                     : "bg-gradient-to-r from-[#7A0C0C] via-[#9E1010] to-[#7A0C0C] hover:from-[#5A0808] hover:to-[#5A0808] text-amber-200 border-amber-400 cursor-pointer active:scale-[0.99]"
-                                            }`}
+                                                }`}
                                         >
                                             <Printer className="w-5 h-5 text-amber-300" />
                                             <span>{submitting ? "जतन करत आहे..." : "देणगी नोंदवा आणि पावती डाऊनलोड करा"}</span>
@@ -562,7 +561,7 @@ export default function DonationPage() {
                 ) : (
                     /* Printable Official Marathi Receipt Section */
                     <div className="space-y-4">
-                        
+
                         {/* Interactive Success Alert Banner */}
                         <div className="bg-emerald-50 border border-emerald-400 text-emerald-950 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 print:hidden shadow-md">
                             <div className="flex items-center gap-3">
@@ -608,7 +607,7 @@ export default function DonationPage() {
 
                         {/* Official Marathi Receipt Card - Printable Format matching Form.tsx */}
                         <div id="printable-receipt-card" className="bg-[#FFFDF9] rounded-2xl border-2 border-amber-800/60 p-6 sm:p-8 space-y-6 shadow-2xl relative">
-                            
+
                             {/* Receipt Banner Header */}
                             <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white py-3 px-4 rounded-xl text-center space-y-0.5 border border-amber-400">
                                 <p className="text-xs font-bold text-amber-400">❖ जय संताजी ❖</p>

@@ -103,7 +103,7 @@ function ExecutivesContent() {
       if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
       if (host.includes("mptm.org")) return "https://api.mptm.org";
     }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
   };
 
   const API_URL = getApiUrl();

@@ -198,7 +198,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             const params = new URLSearchParams(window.location.search);
             const refParam = params.get("ref");
             const typeParam = params.get("type");
-            
+
             if (refParam && refParam.trim()) {
                 setReferredBy(refParam.trim());
             }
@@ -293,7 +293,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         const envUrl = process.env.NEXT_PUBLIC_API_URL;
         const candidateUrls = [
             envUrl,
-            "http://localhost:5007",
+            "http://localhost:5015",
             "http://localhost:5000",
             "https://api.mptmamravati.org"
         ].filter((url, index, self): url is string => Boolean(url) && self.indexOf(url) === index);
@@ -1310,8 +1310,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         {/* Cash ("रोख") Radio Input - Only enabled when accessed via user referral link */}
                                                         <label
                                                             className={`flex items-center gap-1.5 min-h-[36px] ${referredBy
-                                                                    ? "cursor-pointer text-stone-900"
-                                                                    : "cursor-not-allowed opacity-50 text-stone-500"
+                                                                ? "cursor-pointer text-stone-900"
+                                                                : "cursor-not-allowed opacity-50 text-stone-500"
                                                                 }`}
                                                             title={
                                                                 referredBy

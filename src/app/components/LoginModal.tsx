@@ -93,7 +93,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
       if (host.includes("mptm.org")) return "https://api.mptm.org";
     }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5007";
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
   };
 
   const getAdminUrl = (): string => {
@@ -178,7 +178,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         if (res.ok && data.success) {
           verified = true;
         }
-      } catch (err) {}
+      } catch (err) { }
 
       if (!verified) {
         if (inputOtp.trim() === generatedOtp.trim()) {
@@ -319,11 +319,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 setLoginError(null);
                 setSuccessMsg(null);
               }}
-              className={`py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${
-                loginMode === "USER_OTP"
+              className={`py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${loginMode === "USER_OTP"
                   ? "bg-white text-blue-700 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               <Mail className="w-3.5 h-3.5" />
               <span>User Login (OTP)</span>
@@ -336,11 +335,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 setLoginError(null);
                 setSuccessMsg(null);
               }}
-              className={`py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${
-                loginMode === "SUPER_ADMIN"
+              className={`py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 ${loginMode === "SUPER_ADMIN"
                   ? "bg-white text-amber-800 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
               <span>Super Admin</span>
@@ -441,11 +439,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                           onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
                           onKeyDown={(e) => handleOtpKeyDown(idx, e)}
                           onPaste={handleOtpPaste}
-                          className={`w-10 h-12 sm:w-11 sm:h-13 text-center text-xl font-extrabold font-mono text-slate-900 border rounded-xl transition-all shadow-2xs ${
-                            digit
+                          className={`w-10 h-12 sm:w-11 sm:h-13 text-center text-xl font-extrabold font-mono text-slate-900 border rounded-xl transition-all shadow-2xs ${digit
                               ? "border-blue-600 bg-blue-50/40 text-blue-900 ring-1 ring-blue-600"
                               : "border-slate-300 bg-slate-50 hover:bg-white focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>

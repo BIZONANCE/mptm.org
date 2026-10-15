@@ -86,7 +86,7 @@ export default function AdPopup() {
         return "https://api.mptmamravati.org";
       }
     }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
   };
 
   useEffect(() => {
