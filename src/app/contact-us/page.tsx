@@ -36,12 +36,14 @@ export default function ContactUs() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const getApiUrl = (): string => {
+    let url = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (url) return url.replace(/\/api\/v1\/?$/, "").replace(/\/+$/, "");
     if (typeof window !== "undefined") {
       const host = window.location.hostname;
       if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
       if (host.includes("mptm.org")) return "https://api.mptm.org";
     }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
+    return "https://api.mptmamravati.org";
   };
 
   const API_URL = getApiUrl();
@@ -51,9 +53,25 @@ export default function ContactUs() {
     const fetchContactInfo = async () => {
       try {
         const res = await fetch(`${API_URL}/api/contact/info`);
+        if (!res.ok) {
+          console.warn(`Fetch contact info responded with status: ${res.status}`);
+          return;
+        }
         const data = await res.json();
-        if (res.ok && data.success && data.data) {
-          setContactInfo(data.data);
+        if (data.success && data.data) {
+          let altPhone = data.data.alternatePhone;
+          if (!altPhone && typeof window !== "undefined") {
+            const cached = localStorage.getItem("mptm_contact_info");
+            if (cached) {
+              try {
+                altPhone = JSON.parse(cached).alternatePhone;
+              } catch (e) {}
+            }
+          }
+          setContactInfo({
+            ...data.data,
+            alternatePhone: altPhone || "",
+          });
         }
       } catch (err) {
         console.error("Fetch contact info error:", err);
@@ -92,8 +110,11 @@ export default function ContactUs() {
         body: JSON.stringify(formData),
       });
 
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (data.success) {
         setSubmitted(true);
       } else {
         setSubmitError(data.error || "संदेश पाठवताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
