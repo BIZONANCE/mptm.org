@@ -54,13 +54,13 @@ export default function Home() {
         {/* About Content */}
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
 
-          {/* Image */}
-          <div className="relative h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-lg border-2 border-amber-200">
+       {/* Image */}
+          <div className="relative h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-lg border-2 border-amber-200 bg-white flex items-center justify-center">
             <Image
               src="/about-team1.jpg"
               alt="महाराष्ट्र प्रांतिक तैलिक महासभा – कार्यक्रम"
               fill
-              className="object-cover scale-125"
+              className="object-contain p-2"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
