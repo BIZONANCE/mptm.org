@@ -52,8 +52,16 @@ export default function AboutPage() {
             प्रवाहात आणणे हा आहे. सामाजिक बांधिलकी जपत संस्था निरंतर कार्यरत आहे.
           </p>
 
+          {/* Membership Fee */}
+          <h3
+            className="text-xl sm:text-2xl font-bold text-[#4A0404] mt-6 mb-6"
+            style={{ fontFamily: "'Tiro Devanagari Marathi', 'Baloo 2', 'Noto Sans Devanagari', serif" }}
+          >
+            मेंबरशिप फी : ₹ १०१/-
+          </h3>
+
           {/* Registration CTA Button */}
-          <div className="pt-6">
+          <div>
             <Link
               href="/registration"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-extrabold text-base sm:text-lg px-6 py-3.5 rounded-full border-2 border-amber-400 shadow-lg hover:shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all duration-300"
