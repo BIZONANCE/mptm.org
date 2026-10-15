@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { LogIn, Menu, X } from "lucide-react";
 
 export default function Navbar() {
@@ -27,10 +28,16 @@ export default function Navbar() {
             href="/"
             className="flex items-center gap-3 shrink-0"
           >
-            {/* Logo */}
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-amber-200 p-[2px] flex items-center justify-center shadow-md shrink-0">
-              <div className="w-full h-full bg-[#4A0404] rounded-full flex items-center justify-center text-amber-400 text-lg sm:text-xl">
-                🚩
+            {/* Logo Image */}
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-amber-200 p-[2px] flex items-center justify-center shadow-md shrink-0 overflow-hidden">
+              <div className="relative w-full h-full rounded-full overflow-hidden bg-[#4A0404]">
+                <Image
+                  src="/Navlogo.png"
+                  alt="महाराष्ट्र प्रांतिक तैलिक महासभा लोगो"
+                  fill
+                  className="object-cover rounded-full"
+                  priority
+                />
               </div>
             </div>
 
@@ -80,13 +87,6 @@ export default function Navbar() {
               >
                 सदस्य नोंदणी
               </Link>
-                {/* Donation button - Donation */}
-              {/* <Link
-                href="/donation"
-                className="inline-flex items-center justify-center bg-gradient-to-r from-emerald-700 via-emerald-600 to-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-emerald-400/80 shadow-sm hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
-              >
-                <span>Donation</span>
-              </Link> */}
 
               {/* Login Button - Direct link to Admin portal */}
               <a

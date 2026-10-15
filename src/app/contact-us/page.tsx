@@ -7,6 +7,7 @@ import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
 interface ContactInfoData {
   address: string;
   phone: string;
+  alternatePhone?: string;
   email: string;
   hours: string;
 }
@@ -15,6 +16,7 @@ export default function ContactUs() {
   const [contactInfo, setContactInfo] = useState<ContactInfoData>({
     address: "महाराष्ट्र प्रांतिक तैलिक महासभा\nअमरावती विभाग, अमरावती.\nमहाराष्ट्र, भारत.",
     phone: "9876543210",
+    alternatePhone: "",
     email: "info@mptmamravati.org",
     hours: "सोमवार - शनिवार\nसकाळी 10:00 ते संध्याकाळी 6:00",
   });
@@ -182,12 +184,22 @@ export default function ContactUs() {
                       <h3 className="font-bold text-[#4A0404]">
                         फोन नंबर
                       </h3>
-                      <a
-                        href={`tel:${contactInfo.phone}`}
-                        className="mt-1 block text-sm font-bold text-gray-700 hover:text-[#4A0404] transition-colors"
-                      >
-                        +91 {contactInfo.phone}
-                      </a>
+                      <div className="mt-1 space-y-1">
+                        <a
+                          href={`tel:${contactInfo.phone}`}
+                          className="block text-sm font-bold text-gray-700 hover:text-[#4A0404] transition-colors"
+                        >
+                          +91 {contactInfo.phone}
+                        </a>
+                        {contactInfo.alternatePhone && (
+                          <a
+                            href={`tel:${contactInfo.alternatePhone}`}
+                            className="block text-sm font-bold text-gray-700 hover:text-[#4A0404] transition-colors"
+                          >
+                            +91 {contactInfo.alternatePhone}
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

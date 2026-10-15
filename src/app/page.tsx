@@ -30,6 +30,7 @@ export default function Home() {
           />
         </div>
       </section>
+
       {/* ================= ABOUT US ================= */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
 
@@ -49,19 +50,21 @@ export default function Home() {
             अमरावती विभाग,अमरावती  – समाजसेवा, एकता आणि विकासासाठी समर्पित संस्था
           </p>
         </div>
-         {/* About Content */}
+
+        {/* About Content */}
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
 
           {/* Image */}
           <div className="relative h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-lg border-2 border-amber-200">
             <Image
-              src="/about-team.jpg"
+              src="/about-team1.jpg"
               alt="महाराष्ट्र प्रांतिक तैलिक महासभा – कार्यक्रम"
               fill
-              className="object-cover"
+              className="object-cover scale-125"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
+
           {/* Text */}
           <div>
             <h3 className="text-2xl sm:text-3xl font-bold text-[#4A0404] mb-5">
@@ -99,15 +102,15 @@ export default function Home() {
                 href="/registration"
                 className="inline-flex items-center gap-2 bg-gradient-to-r from-[#4A0404] via-[#6d0909] to-[#4A0404] hover:from-amber-600 hover:via-amber-500 hover:to-amber-600 text-white font-extrabold text-base sm:text-lg px-6 py-3.5 rounded-full border-2 border-amber-400 shadow-lg hover:shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all duration-300"
               >
-                <span>🚩 ऑनलाइन सदस्य नोंदणी करा</span>
+                <span>🚩 ऑनलाईन सदस्य नोंदणी करा</span>
                 <span className="text-amber-300 font-bold ml-1">→</span>
               </Link>
             </div>
           </div>
-          </div>
+        </div>
       </section>
 
-{/* ================= VISION & MISSION ================= */}
+      {/* ================= VISION & MISSION ================= */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-16">
 
         <div className="text-center mb-8">
@@ -117,7 +120,6 @@ export default function Home() {
 
           <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-amber-500" />
         </div>
-
 
         <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
 
@@ -144,7 +146,6 @@ export default function Home() {
 
           </div>
 
-
           {/* Mission */}
           <div className="bg-white border border-amber-200 rounded-2xl p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-300">
 
@@ -157,7 +158,7 @@ export default function Home() {
               <h3 className="text-xl sm:text-2xl font-bold text-[#4A0404]">
                 ध्येय
               </h3>
-              </div>
+            </div>
 
             <p className="text-slate-700 leading-7">
               शैक्षणिक मदत, आरोग्य शिबिरे, महिला सक्षमीकरण, युवकांना
@@ -170,6 +171,7 @@ export default function Home() {
 
         </div>
       </section>
+
       {/* ================= OUR VALUES ================= */}
       <section className="bg-[#FDFBF7] border-y border-amber-500/30 py-12 sm:py-14 px-4 sm:px-6 lg:px-8">
 
@@ -182,7 +184,6 @@ export default function Home() {
 
             <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-amber-500" />
           </div>
-
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Unity */}
@@ -197,6 +198,7 @@ export default function Home() {
                 समाजातील सर्व घटकांना एकत्र आणणे
               </p>
             </div>
+
             {/* Service */}
             <div className="border border-amber-500/30 rounded-xl p-6 text-center bg-[#4A0404] transition">
               <HeartHandshake className="w-8 h-8 text-amber-300 mx-auto mb-3" />
@@ -209,6 +211,7 @@ export default function Home() {
                 निस्वार्थ भावनेने समाजसेवा करणे
               </p>
             </div>
+
             {/* Development */}
             <div className="border border-amber-500/30 rounded-xl p-6 text-center bg-[#4A0404] transition">
               <Globe className="w-8 h-8 text-amber-300 mx-auto mb-3" />
@@ -221,6 +224,7 @@ export default function Home() {
                 शैक्षणिक व आर्थिक प्रगतीसाठी प्रयत्न
               </p>
             </div>
+
             {/* Trust */}
             <div className="border border-amber-500/30 rounded-xl p-6 text-center bg-[#4A0404] transition">
               <ShieldCheck className="w-8 h-8 text-amber-300 mx-auto mb-3" />
@@ -239,13 +243,9 @@ export default function Home() {
         </div>
       </section>
 
-
-
-
-
       {/* Primary Member Registration Form Component */}
       <main className="flex-1 py-6">
-       
+        
       </main>
 
       {/* Upcoming & Conducted Events — Home page only */}
