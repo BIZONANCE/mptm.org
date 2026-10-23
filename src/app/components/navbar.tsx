@@ -5,10 +5,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { LogIn, Menu, X } from "lucide-react";
+import { getAdminUrl } from "@/utils/config";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const adminUrl = getAdminUrl();
 
   const navLinks = [
     { href: "/", label: "मुख्यपृष्ठ" },
@@ -90,7 +92,7 @@ export default function Navbar() {
 
               {/* Login Button - Direct link to Admin portal */}
               <a
-                href="https://admin.mptmamravati.org"
+                href={adminUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 hover:text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-amber-400/50 shadow-sm hover:border-amber-400 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0 cursor-pointer"
@@ -149,7 +151,7 @@ export default function Navbar() {
               </Link>
 
               <a
-                href="https://admin.mptmamravati.org"
+                href={adminUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsOpen(false)}

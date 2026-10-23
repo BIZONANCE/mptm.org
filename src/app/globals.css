@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Marathi:ital@0;1&family=Baloo+2:wght@400;500;600;700;800&family=Yatra+One&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Tiro Devanagari Marathi', 'Baloo 2', serif;
+}
+
 :root {
   --background: #fdfbf7;
   --foreground: #1c1917;
@@ -12,12 +17,16 @@ body {
   overflow-x: hidden;
 }
 
-body, p, span, button, input, select, textarea, td, th, label {
-  font-family: 'Noto Sans Devanagari', 'Baloo 2', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+body, p, span, td, th, label {
+  font-family: 'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+button, input, select, textarea {
+  font-family: 'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Tiro Devanagari Marathi', 'Baloo 2', 'Noto Sans Devanagari', serif;
+  font-family: 'Tiro Devanagari Marathi', 'Baloo 2', serif;
 }
 
 /* Custom ornamental border & glow utilities */

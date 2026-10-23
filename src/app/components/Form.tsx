@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { AlertTriangle, Phone, X } from "lucide-react";
 import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
+import { getApiUrl } from "@/utils/config";
 
 interface MainMember {
     srNo: number;
@@ -178,20 +180,19 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             ? "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या कार्यकारिणी सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली."
             : "वरील रक्कम महाराष्ट्र प्रांतिक तैलिक महासभेच्या प्राथमिक सदस्य नोंदणी शुल्क म्हणून प्राप्त झाली.";
 
-    const [baseMemberSeq, setBaseMemberSeq] = useState(1);
-    const [receiptSeq, setReceiptSeq] = useState(1);
+    // One unique idempotency key per form session
+    const [idempotencyKey] = useState<string>(() => {
+        if (typeof window !== "undefined" && window.crypto && window.crypto.randomUUID) {
+            return window.crypto.randomUUID();
+        }
+        return "reg_" + Math.random().toString(36).substring(2) + Date.now();
+    });
 
     // Referral link tracking & initial membership type handling
     const [referredBy, setReferredBy] = useState<string>("");
     const [membershipType, setMembershipType] = useState<"PRIMARY" | "EXECUTIVE">(initialMembershipType);
 
-    const formatMemberNo = (srNo: number, baseSeq: number = baseMemberSeq, dateStr?: string) => {
-        if (membershipType === "EXECUTIVE") {
-            return `MPTM-EM-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
-        }
-        const year = extractYear(dateStr);
-        return `MPTM-${year}-AMT-S${String(baseSeq + srNo - 1).padStart(3, "0")}`;
-    };
+    const SERVER_ASSIGNED_PLACEHOLDER = "MPTM-2026-AMT-R*****";
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -207,23 +208,17 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                 setMembershipType("EXECUTIVE");
                 setFormData((prev) => ({
                     ...prev,
-                    receiptNo: formatReceiptNo(receiptSeq, prev.date, true),
+                    receiptNo: initialMembershipType === "EXECUTIVE" ? "MPTM-EM-R*****" : "MPTM-2026-AMT-R*****",
                     registrationFee: "1001",
                     amountInWords: convertNumberToMarathiWords("1001"),
                 }));
-                setMainMembers((prev) =>
-                    prev.map((m, idx) => ({
-                        ...m,
-                        memberNo: `MPTM-EM-S${String(baseMemberSeq + idx).padStart(3, "0")}`,
-                    }))
-                );
             }
         }
-    }, [initialMembershipType, receiptSeq, baseMemberSeq]);
+    }, [initialMembershipType]);
 
     // Main Members list (Default 1 Main Member)
     const [mainMembers, setMainMembers] = useState<MainMember[]>([
-        { srNo: 1, memberNo: formatMemberNo(1, 1), fullName: "", mobileNo: "", prabhagNo: "" },
+        { srNo: 1, memberNo: SERVER_ASSIGNED_PLACEHOLDER, fullName: "", mobileNo: "", prabhagNo: "" },
     ]);
 
     // Family Members table (Initial 1 row default)
@@ -234,7 +229,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     const initialFee = membershipType === "EXECUTIVE" ? 1001 : DEFAULT_BASE_FEE * 1;
 
     const [formData, setFormData] = useState({
-        receiptNo: formatReceiptNo(1),
+        receiptNo: membershipType === "EXECUTIVE" ? "MPTM-EM-R*****" : "MPTM-2026-AMT-R*****",
         date: formatDateToDDMMYYYY(new Date()),
         registrationFee: initialFee.toString(),
         address: "",
@@ -246,172 +241,58 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         country: "भारत",
         pincode: "",
         amountInWords: convertNumberToMarathiWords(initialFee.toString()),
-        paymentMethod: "UPI",
+        paymentMethod: "ONLINE_PHONEPE",
         otherPaymentMethod: "",
     });
 
+    const calculateFee = (type: "PRIMARY" | "EXECUTIVE", count: number) => {
+        return type === "EXECUTIVE" ? 1001 : DEFAULT_BASE_FEE * count;
+    };
+
     const handleMembershipTypeChange = (type: "PRIMARY" | "EXECUTIVE") => {
         setMembershipType(type);
-        const fee = type === "EXECUTIVE" ? 1001 : 101 * mainMembers.length;
+        const fee = calculateFee(type, mainMembers.length);
         setFormData((prev) => ({
             ...prev,
-            receiptNo: formatReceiptNo(receiptSeq, prev.date, type === "EXECUTIVE"),
+            receiptNo: SERVER_ASSIGNED_PLACEHOLDER,
             registrationFee: fee.toString(),
             amountInWords: convertNumberToMarathiWords(fee.toString()),
         }));
-        setMainMembers((prev) =>
-            prev.map((m, idx) => ({
-                ...m,
-                memberNo: formatMemberNo(idx + 1, baseMemberSeq, formData.date),
-            }))
-        );
-        fetchNextNumbers(type);
     };
 
-    // Ensure payment method defaults to UPI if cash is disabled (no referral link)
-    useEffect(() => {
-        if (!referredBy && formData.paymentMethod === "रोख") {
-            setFormData((prev) => ({ ...prev, paymentMethod: "UPI" }));
-        }
-    }, [referredBy, formData.paymentMethod]);
-
-    const [cashPaidStatus, setCashPaidStatus] = useState<"yes" | "no" | "">("");
-    const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
-    const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-    const [screenshotError, setScreenshotError] = useState<string>("");
-    const [typedMessage, setTypedMessage] = useState<string>("");
     const [submitting, setSubmitting] = useState(false);
     const [submitSuccessMsg, setSubmitSuccessMsg] = useState("");
     const [submitErrorMsg, setSubmitErrorMsg] = useState("");
 
-    const isPaymentVerified =
-        (formData.paymentMethod === "रोख" && cashPaidStatus === "yes") ||
-        (formData.paymentMethod === "UPI" && Boolean(paymentScreenshot));
+    interface DuplicateModalState {
+        open: boolean;
+        mobileNo: string;
+        memberNo?: string;
+        fullName?: string;
+        memberIndex?: number;
+    }
+    const [duplicateModal, setDuplicateModal] = useState<DuplicateModalState | null>(null);
 
-    // Helper to attempt API requests across candidate URLs with retries
-    const fetchWithFallback = async (endpoint: string, options?: RequestInit): Promise<Response> => {
-        const envUrl = process.env.NEXT_PUBLIC_API_URL;
-        const candidateUrls = [
-            envUrl,
-            "http://localhost:5015",
-            "http://localhost:5000",
-            "https://api.mptmamravati.org"
-        ].filter((url, index, self): url is string => Boolean(url) && self.indexOf(url) === index);
+    const API_URL = getApiUrl() || "http://localhost:5015";
 
-        let lastError: any = null;
-
-        for (const baseUrl of candidateUrls) {
+    const handleMainMobileBlur = async (index: number) => {
+        const mob = mainMembers[index]?.mobileNo?.trim();
+        if (mob && /^[1-9]\d{9}$/.test(mob)) {
             try {
-                const targetUrl = `${baseUrl.replace(/\/$/, "")}${endpoint}`;
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-                const response = await fetch(targetUrl, {
-                    ...options,
-                    signal: controller.signal,
-                });
-                clearTimeout(timeoutId);
-
-                if (response.ok) {
-                    return response;
+                const res = await fetch(`${API_URL}/api/members/check-mobile/${mob}`);
+                const data = await res.json();
+                if (data.success && data.exists) {
+                    setDuplicateModal({
+                        open: true,
+                        mobileNo: mob,
+                        memberNo: data.memberNo,
+                        fullName: data.fullName,
+                        memberIndex: index,
+                    });
                 }
-
-                // If non-200, check content type; if it's JSON, return it so caller handles API errors
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.includes("application/json")) {
-                    return response;
-                }
-            } catch (err) {
-                lastError = err;
-                console.warn(`Connection failed for ${baseUrl}${endpoint}, trying next candidate...`, err);
+            } catch (_) {
+                // Ignore blur check network errors
             }
-        }
-
-        throw lastError || new Error("सर्व्हरशी संपर्क साधता आला नाही. कृपया बॅकएंड सर्व्हर सुरू असल्याची खात्री करा.");
-    };
-
-    // Fetch unique next receipt and member numbers safely from Backend API
-    const fetchNextNumbers = async (targetType: "PRIMARY" | "EXECUTIVE" = membershipType) => {
-        try {
-            const res = await fetchWithFallback(`/api/next-numbers?type=${targetType}`);
-
-            if (!res.ok) {
-                console.warn(`Backend sequence API returned status ${res.status}`);
-                return;
-            }
-
-            const contentType = res.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                console.warn("Backend sequence API did not return JSON.");
-                return;
-            }
-
-            const data = await res.json();
-
-            if (data.success) {
-                const rSeq = data.nextReceiptSeq || 1;
-                const mSeq = data.nextMemberSeq || 1;
-                setReceiptSeq(rSeq);
-                setBaseMemberSeq(mSeq);
-                setFormData((prev) => ({
-                    ...prev,
-                    receiptNo: data.receiptNo || formatReceiptNo(rSeq, prev.date, targetType === "EXECUTIVE"),
-                }));
-                setMainMembers((prev) =>
-                    prev.map((m, idx) => ({
-                        ...m,
-                        memberNo: data.nextMemberNo && idx === 0 ? data.nextMemberNo : formatMemberNo(idx + 1, mSeq, formData.date),
-                    }))
-                );
-            }
-        } catch (err) {
-            console.error("Error fetching next sequence numbers:", err);
-        }
-    };
-
-    useEffect(() => {
-        fetchNextNumbers(membershipType);
-    }, [membershipType]);
-
-    // Typing transition effect for Sandesh (संदेश) message
-    useEffect(() => {
-        const fullMessage = getFullSandeshMessage(membershipType);
-        if (isPaymentVerified) {
-            setTypedMessage("");
-            let idx = 0;
-            const interval = setInterval(() => {
-                if (idx < fullMessage.length) {
-                    setTypedMessage(fullMessage.slice(0, idx + 1));
-                    idx++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, 30);
-
-            return () => clearInterval(interval);
-        } else {
-            setTypedMessage("");
-        }
-    }, [isPaymentVerified, paymentScreenshot, formData.paymentMethod, membershipType]);
-
-    const getRatePerMember = (currentFeeStr: string, memberCount: number) => {
-        const currentNum = parseInt(currentFeeStr, 10);
-        if (!isNaN(currentNum) && currentNum > 0 && memberCount > 0) {
-            return Math.round(currentNum / memberCount);
-        }
-        return DEFAULT_BASE_FEE;
-    };
-
-    const handleScreenshotChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setPaymentScreenshot(file);
-            setScreenshotError("");
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setScreenshotPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
         }
     };
 
@@ -419,43 +300,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
-
-        if (name === "paymentMethod") {
-            setFormData((prev) => ({ ...prev, paymentMethod: value }));
-            setCashPaidStatus("");
-        } else if (name === "registrationFee") {
-            setFormData((prev) => ({
-                ...prev,
-                registrationFee: value,
-                amountInWords: convertNumberToMarathiWords(value),
-            }));
-        } else if (name === "date") {
-            const newDate = value;
-            setFormData((prev) => ({
-                ...prev,
-                date: newDate,
-                receiptNo: formatReceiptNo(receiptSeq, newDate),
-            }));
-            setMainMembers((prev) =>
-                prev.map((m, idx) => ({
-                    ...m,
-                    memberNo: formatMemberNo(idx + 1, baseMemberSeq, newDate),
-                }))
-            );
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
-        }
-    };
-
-    const handleFeeBlur = () => {
-        const feeNum = parseInt(formData.registrationFee, 10);
-        if (isNaN(feeNum) || feeNum < 101) {
-            setFormData((prev) => ({
-                ...prev,
-                registrationFee: "101",
-                amountInWords: convertNumberToMarathiWords("101"),
-            }));
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleMainMemberChange = (
@@ -472,9 +317,12 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
 
     const addMainMember = () => {
         setMainMembers((prev) => {
-            const currentRate = getRatePerMember(formData.registrationFee, prev.length);
+            if (prev.length >= 10) {
+                setSubmitErrorMsg("एका वेळी जास्तीत जास्त १० मुख्य सदस्यांची नोंदणी करता येते.");
+                return prev;
+            }
             const newCount = prev.length + 1;
-            const newFee = newCount * currentRate;
+            const newFee = calculateFee(membershipType, newCount);
 
             setFormData((f) => ({
                 ...f,
@@ -486,7 +334,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                 ...prev,
                 {
                     srNo: newCount,
-                    memberNo: formatMemberNo(newCount, baseMemberSeq, formData.date),
+                    memberNo: SERVER_ASSIGNED_PLACEHOLDER,
                     fullName: "",
                     mobileNo: "",
                     prabhagNo: "",
@@ -499,16 +347,15 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         setMainMembers((prev) => {
             if (prev.length <= 1) return prev;
 
-            const currentRate = getRatePerMember(formData.registrationFee, prev.length);
             const updated = prev.filter((_, idx) => idx !== indexToDelete);
             const reindexed = updated.map((m, idx) => ({
                 ...m,
                 srNo: idx + 1,
-                memberNo: formatMemberNo(idx + 1, baseMemberSeq, formData.date),
+                memberNo: SERVER_ASSIGNED_PLACEHOLDER,
             }));
 
             const newCount = reindexed.length;
-            const newFee = newCount * currentRate;
+            const newFee = calculateFee(membershipType, newCount);
 
             setFormData((f) => ({
                 ...f,
@@ -533,17 +380,23 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     };
 
     const addFamilyMemberRow = () => {
-        setFamilyMembers((prev) => [
-            ...prev,
-            {
-                srNo: prev.length + 1,
-                name: "",
-                relation: "",
-                dob: "",
-                occupation: "",
-                mobile: "",
-            },
-        ]);
+        setFamilyMembers((prev) => {
+            if (prev.length >= 20) {
+                setSubmitErrorMsg("एका वेळी जास्तीत जास्त २० कौटुंबिक सदस्यांची नोंदणी करता येते.");
+                return prev;
+            }
+            return [
+                ...prev,
+                {
+                    srNo: prev.length + 1,
+                    name: "",
+                    relation: "",
+                    dob: "",
+                    occupation: "",
+                    mobile: "",
+                },
+            ];
+        });
     };
 
     const deleteFamilyMemberRow = (indexToDelete: number) => {
@@ -554,43 +407,40 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     };
 
     const validateFullForm = () => {
-        const FILL_FORM_FIRST_MSG = "⚠️ कृपया आधी संपूर्ण फॉर्म भरा!";
-
-        if (!formData.receiptNo || formData.receiptNo.trim() === "") {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
-            return false;
-        }
-
-        if (!formData.date || formData.date.trim() === "") {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
-            return false;
-        }
-
-        const feeNum = parseInt(formData.registrationFee, 10);
-        if (!formData.registrationFee || formData.registrationFee.trim() === "" || isNaN(feeNum) || feeNum < 101) {
-            setScreenshotError("⚠️ नोंदणी शुल्क/देय रक्कम ₹101 पेक्षा कमी असू शकत नाही!");
-            return false;
-        }
+        setSubmitErrorMsg("");
 
         if (!formData.address || formData.address.trim() === "") {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
+            setSubmitErrorMsg("⚠️ कृपया पत्ता प्रविष्ट करा!");
             return false;
         }
 
         if (!formData.city || formData.city.trim() === "") {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
+            setSubmitErrorMsg("⚠️ कृपया शहर प्रविष्ट करा!");
             return false;
         }
 
         if (!formData.district || formData.district.trim() === "") {
-            setScreenshotError(FILL_FORM_FIRST_MSG);
+            setSubmitErrorMsg("⚠️ कृपया जिल्हा प्रविष्ट करा!");
+            return false;
+        }
+
+        if (formData.pincode && formData.pincode.trim() !== "" && !/^\d{6}$/.test(formData.pincode.trim())) {
+            setSubmitErrorMsg("⚠️ पिनकोड ६ अंकी असावा!");
             return false;
         }
 
         for (let i = 0; i < mainMembers.length; i++) {
             const m = mainMembers[i];
-            if (!m.fullName || m.fullName.trim() === "" || !m.mobileNo || m.mobileNo.length !== 10 || !m.prabhagNo || m.prabhagNo.trim() === "") {
-                setScreenshotError(FILL_FORM_FIRST_MSG);
+            if (!m.fullName || m.fullName.trim() === "") {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चे पूर्ण नाव आवश्यक आहे!`);
+                return false;
+            }
+            if (!m.mobileNo || !/^\d{10}$/.test(m.mobileNo.trim())) {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा मोबाईल क्रमांक १० अंकी असावा!`);
+                return false;
+            }
+            if (!m.prabhagNo || m.prabhagNo.trim() === "") {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा प्रभाग क्रमांक आवश्यक आहे!`);
                 return false;
             }
         }
@@ -600,31 +450,17 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             const hasAnyData = fm.name.trim() !== "" || fm.relation.trim() !== "" || fm.dob.trim() !== "" || fm.occupation.trim() !== "" || fm.mobile.trim() !== "";
 
             if (hasAnyData) {
-                if (!fm.name || fm.name.trim() === "" || !fm.relation || fm.relation.trim() === "" || !fm.dob || fm.dob.trim() === "") {
-                    setScreenshotError(FILL_FORM_FIRST_MSG);
+                if (!fm.name || fm.name.trim() === "" || !fm.relation || fm.relation.trim() === "") {
+                    setSubmitErrorMsg(`⚠️ कौटुंबिक सदस्य #${i + 1} चे नाव व नाते आवश्यक आहे!`);
                     return false;
                 }
-                if (fm.mobile && fm.mobile.length !== 10) {
-                    setScreenshotError(FILL_FORM_FIRST_MSG);
+                if (fm.mobile && fm.mobile.trim() !== "" && !/^\d{10}$/.test(fm.mobile.trim())) {
+                    setSubmitErrorMsg(`⚠️ कौटुंबिक सदस्य #${i + 1} चा मोबाईल क्रमांक १० अंकी असावा!`);
                     return false;
                 }
             }
         }
 
-        if (formData.paymentMethod === "रोख" && cashPaidStatus !== "yes") {
-            setScreenshotError("⚠️ कृपया रोख रक्कम भरली गेली असल्याची (होय) निवड करा!");
-            return false;
-        }
-
-        // Commented out since online payment section is bypassed
-        // if (formData.paymentMethod === "UPI" && !paymentScreenshot) {
-        //     setScreenshotError(
-        //         "⚠️ ऑनलाईन देयकासाठी ट्रान्सअॅक्शनचा स्क्रीनशॉट अपलोड करणे अनिवार्य आहे!"
-        //     );
-        //     return false;
-        // }
-
-        setScreenshotError("");
         return true;
     };
 
@@ -634,87 +470,95 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
 
         setSubmitting(true);
         setSubmitErrorMsg("");
-        setSubmitSuccessMsg("");
+        setSubmitSuccessMsg("सुरक्षित पेमेंट पृष्ठावर घेऊन जात आहे, कृपया प्रतीक्षा करा...");
 
         try {
-            const response = await fetchWithFallback("/api/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    formData: {
-                        ...formData,
-                        date: formatDateToDDMMYYYY(formData.date),
-                        referredBy: referredBy || "Direct Website",
-                    },
-                    mainMembers,
-                    familyMembers: familyMembers.map((fm) => ({
-                        ...fm,
-                        dob: formatDateToDDMMYYYY(fm.dob),
-                    })),
-                    paymentScreenshot: screenshotPreview,
-                    referredBy: referredBy || "Direct Website",
-                }),
-            });
+            const trimmedAddress = formData.address.trim();
+            const trimmedGaav = formData.gaav.trim();
+            const trimmedTaluka = formData.taluka.trim();
+            const trimmedCity = formData.city.trim() || "अमरावती";
+            const trimmedDistrict = formData.district.trim() || "अमरावती";
+            const trimmedState = formData.state.trim() || "महाराष्ट्र";
+            const trimmedCountry = formData.country.trim() || "भारत";
+            const trimmedPincode = formData.pincode.trim();
+            const trimmedReferredBy = referredBy || "Direct Website";
 
-            // Safeguard against HTML 404 / 500 error pages
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("सर्व्हरने अयोग्य प्रतिसाद (HTML) दिला. कृपया बॅकएंड सर्व्हर सुरू असल्याची खात्री करा.");
-            }
+            const payload = {
+                type: membershipType,
+                address: trimmedAddress,
+                gaav: trimmedGaav || null,
+                taluka: trimmedTaluka || null,
+                city: trimmedCity,
+                district: trimmedDistrict,
+                state: trimmedState,
+                country: trimmedCountry,
+                pincode: trimmedPincode || null,
+                referredBy: trimmedReferredBy,
+                formData: {
+                    date: formatDateToDDMMYYYY(formData.date),
+                    address: trimmedAddress,
+                    gaav: trimmedGaav,
+                    taluka: trimmedTaluka,
+                    city: trimmedCity,
+                    district: trimmedDistrict,
+                    state: trimmedState,
+                    country: trimmedCountry,
+                    pincode: trimmedPincode,
+                    referredBy: trimmedReferredBy,
+                },
+                mainMembers: mainMembers.map((m) => ({
+                    srNo: m.srNo,
+                    fullName: m.fullName.trim(),
+                    mobileNo: m.mobileNo.trim(),
+                    prabhagNo: m.prabhagNo.trim(),
+                })),
+                familyMembers: familyMembers
+                    .filter((fm) => fm.name && fm.name.trim() !== "")
+                    .map((fm) => ({
+                        srNo: fm.srNo,
+                        name: fm.name.trim(),
+                        relation: fm.relation.trim(),
+                        dob: formatDateToDDMMYYYY(fm.dob),
+                        occupation: fm.occupation.trim(),
+                        mobile: fm.mobile.trim(),
+                    })),
+            };
+
+            const response = await fetch(`${API_URL}/api/registrations/online/start`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Idempotency-Key": idempotencyKey,
+                },
+                body: JSON.stringify(payload),
+            });
 
             const result = await response.json();
 
-            if (result.success) {
-                setSubmitSuccessMsg("✅ सदस्य नोंदणी यशस्वीरित्या जतन झाली!");
-
-                // Open browser print dialog for receipt
-                window.print();
-
-                // Auto-refresh form fields for the next submission after printing
-                setTimeout(async () => {
-                    setFormData({
-                        receiptNo: formatReceiptNo(receiptSeq + 1),
-                        date: formatDateToDDMMYYYY(new Date()),
-                        registrationFee: "101",
-                        address: "",
-                        gaav: "",
-                        taluka: "",
-                        city: "अमरावती",
-                        district: "अमरावती",
-                        state: "महाराष्ट्र",
-                        country: "भारत",
-                        pincode: "",
-                        amountInWords: "एकशे एक रुपये फक्त",
-                        paymentMethod: "UPI",
-                        otherPaymentMethod: "",
-                    });
-                    setMainMembers([
-                        {
-                            srNo: 1,
-                            memberNo: formatMemberNo(1, baseMemberSeq + 1),
-                            fullName: "",
-                            mobileNo: "",
-                            prabhagNo: "",
-                        },
-                    ]);
-                    setFamilyMembers([
-                        { srNo: 1, name: "", relation: "", dob: "", occupation: "", mobile: "" },
-                    ]);
-                    setPaymentScreenshot(null);
-                    setScreenshotPreview(null);
-                    setCashPaidStatus("");
-                    setSubmitSuccessMsg("");
-                    setSubmitErrorMsg("");
-                    await fetchNextNumbers();
-                }, 1000);
+            if (result.success && result.redirectUrl) {
+                // Redirect user directly to PhonePe checkout
+                window.location.href = result.redirectUrl;
             } else {
-                setSubmitErrorMsg(result.error || "❌ डेटाबेसमध्ये जतन करताना त्रुटी आली. हा मोबाईल क्रमांक किंवा माहिती आधीच नोंदणीकृत असण्याची शक्यता आहे.");
+                setSubmitting(false);
+                if (
+                    result.code === "DUPLICATE_MOBILE" ||
+                    (result.error && result.error.includes("आधीच मुख्य सदस्य म्हणून नोंदणीकृत"))
+                ) {
+                    const dupMember = result.duplicateMembers?.[0];
+                    setDuplicateModal({
+                        open: true,
+                        mobileNo: dupMember?.mobileNo || result.duplicateList || "",
+                        memberNo: dupMember?.memberNo || "",
+                        memberIndex: 0,
+                    });
+                } else {
+                    setSubmitErrorMsg(result.error || "पेमेंट सुरू करताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.");
+                }
             }
         } catch (err: unknown) {
-            console.error("Submission error:", err);
-            const errorMessage = err instanceof Error ? err.message : "❌ सर्व्हरशी संपर्क साधताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.";
+            console.error("Online registration submission error:", err);
+            const errorMessage = err instanceof Error ? err.message : "सर्व्हरशी संपर्क साधताना त्रुटी आली. कृपया पुन्हा प्रयत्न करा.";
             setSubmitErrorMsg(errorMessage);
-        } finally {
             setSubmitting(false);
         }
     };
@@ -729,9 +573,18 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         "flex-1 w-full bg-amber-100/40 border-b-2 border-stone-800 outline-none px-2 py-2 sm:py-0.5 text-base sm:text-sm font-extrabold text-stone-900 cursor-not-allowed select-none";
 
     return (
-        <div className="w-full max-w-5xl mx-auto my-4 sm:my-8 px-3 sm:px-4 font-sans print:my-0 print:p-0 print-page-wrapper">
+        <div
+            className="w-full max-w-5xl mx-auto my-4 sm:my-8 px-3 sm:px-4 print:my-0 print:p-0 print-page-wrapper"
+            style={{ fontFamily: "'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, sans-serif" }}
+        >
+
+
             {/* Receipt Card Container */}
-            <div id="printable-receipt-card" className="bg-[#FFFDF9] border-2 border-amber-800/40 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden print:border-amber-800/60 print:shadow-none print:rounded-xl">
+            <div
+                id="printable-receipt-card"
+                className="bg-[#FFFDF9] border-2 border-amber-800/40 rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden print:border-amber-800/60 print:shadow-none print:rounded-xl"
+                style={{ fontFamily: "'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, sans-serif" }}
+            >
 
                 <form onSubmit={handleSubmit}>
                     <table className="w-full border-collapse">
@@ -792,42 +645,27 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-sm sm:text-base">
                                                     पावती क्र. :
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    name="receiptNo"
-                                                    value={formData.receiptNo}
-                                                    readOnly
-                                                    className={inputReadOnly}
-                                                />
+                                                <span className="font-mono font-extrabold text-stone-900 text-sm sm:text-base">
+                                                    {formData.receiptNo}
+                                                </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-sm sm:text-base">
                                                     दिनांक :
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    name="date"
-                                                    value={formData.date}
-                                                    readOnly
-                                                    className={inputReadOnly}
-                                                />
+                                                <span className="font-mono font-bold text-stone-900 text-sm sm:text-base">
+                                                    {formData.date}
+                                                </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-sm sm:text-base">
                                                     नोंदणी शुल्क: रु.
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    inputMode="numeric"
-                                                    name="registrationFee"
-                                                    value={formData.registrationFee}
-                                                    onChange={handleChange}
-                                                    onBlur={handleFeeBlur}
-                                                    required
-                                                    className={`${inputBase} font-extrabold text-[#7A0C0C]`}
-                                                />
+                                                <span className="font-mono font-black text-[#7A0C0C] text-sm sm:text-base">
+                                                    {formData.registrationFee}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -879,34 +717,8 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         </div>
 
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 print:gap-2">
-                                                            <div className="flex items-center gap-2">
-                                                                <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                                    {getMemberOrdinalLabel(member.srNo)} :
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={member.memberNo}
-                                                                    readOnly
-                                                                    className={inputReadOnly}
-                                                                />
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2">
-                                                                <label className="font-bold text-red-700 whitespace-nowrap text-xs sm:text-sm">
-                                                                    प्रभाग क्रमांक :
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    value={member.prabhagNo}
-                                                                    onChange={(e) =>
-                                                                        handleMainMemberChange(index, "prabhagNo", e.target.value)
-                                                                    }
-                                                                    placeholder="प्रभाग किंवा वॉर्ड क्रमांक"
-                                                                    className={inputBase}
-                                                                />
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2">
+                                                            {/* First Line: सदस्याचे पूर्णनाव */}
+                                                            <div className="flex items-center gap-2 sm:col-span-2">
                                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                     सदस्याचे पूर्णनाव :
                                                                 </label>
@@ -922,22 +734,41 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                                 />
                                                             </div>
 
+                                                            {/* Below It: मोबाईल क्रमांक */}
                                                             <div className="flex items-center gap-2">
                                                                 <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
                                                                     मोबाईल क्रमांक :
                                                                 </label>
                                                                 <input
                                                                     type="tel"
+                                                                    id={`main-member-mobile-${index}`}
                                                                     value={member.mobileNo}
                                                                     onChange={(e) => {
                                                                         const cleanVal = e.target.value.replace(/\D/g, "").slice(0, 10);
                                                                         handleMainMemberChange(index, "mobileNo", cleanVal);
                                                                     }}
+                                                                    onBlur={() => handleMainMobileBlur(index)}
                                                                     required
                                                                     maxLength={10}
                                                                     pattern="[0-9]{10}"
                                                                     inputMode="numeric"
                                                                     placeholder="१० अंकी मोबाईल नंबर"
+                                                                    className={inputBase}
+                                                                />
+                                                            </div>
+
+                                                            {/* Below It: प्रभाग क्रमांक */}
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="font-bold text-red-700 whitespace-nowrap text-xs sm:text-sm">
+                                                                    प्रभाग क्रमांक :
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={member.prabhagNo}
+                                                                    onChange={(e) =>
+                                                                        handleMainMemberChange(index, "prabhagNo", e.target.value)
+                                                                    }
+                                                                    placeholder="प्रभाग किंवा वॉर्ड क्रमांक"
                                                                     className={inputBase}
                                                                 />
                                                             </div>
@@ -1291,215 +1122,45 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                 type="text"
                                                 name="amountInWords"
                                                 value={formData.amountInWords}
-                                                onChange={handleChange}
-                                                required
-                                                placeholder="उदा. एकशे एक रुपये फक्त"
-                                                className={`${inputBase} font-extrabold text-[#7A0C0C]`}
+                                                readOnly
+                                                className={`${inputReadOnly} text-[#7A0C0C]`}
                                             />
                                         </div>
 
-                                        {/* Payment Method Selection */}
-                                        <div className="space-y-3 pt-1">
-                                            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 p-3 rounded-xl bg-amber-50/80 border border-amber-300/80 print:p-2">
-                                                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 sm:gap-4">
-                                                    <label className="font-bold text-stone-800 whitespace-nowrap text-xs sm:text-sm">
-                                                        देयक पद्धत :
-                                                    </label>
-
-                                                    <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-stone-900 font-semibold text-sm sm:text-sm">
-                                                        {/* Cash ("रोख") Radio Input - Only enabled when accessed via user referral link */}
-                                                        <label
-                                                            className={`flex items-center gap-1.5 min-h-[36px] ${referredBy
-                                                                ? "cursor-pointer text-stone-900"
-                                                                : "cursor-not-allowed opacity-50 text-stone-500"
-                                                                }`}
-                                                            title={
-                                                                referredBy
-                                                                    ? "रोख देयक निवडा"
-                                                                    : "रोख पर्याय फक्त युझरच्या अधिकृत लिंकद्वारेच उपलब्ध आहे"
-                                                            }
-                                                        >
-                                                            <input
-                                                                type="radio"
-                                                                name="paymentMethod"
-                                                                value="रोख"
-                                                                checked={formData.paymentMethod === "रोख"}
-                                                                onChange={handleChange}
-                                                                disabled={!referredBy}
-                                                                className={`w-4 h-4 sm:w-3.5 sm:h-3.5 accent-amber-800 ${referredBy ? "cursor-pointer" : "cursor-not-allowed"
-                                                                    }`}
-                                                            />
-                                                            <span>रोख</span>
-                                                        </label>
-
-                                                        {/* Pay Now Button (Disabled / Unclickable for now) */}
-                                                        <button
-                                                            type="button"
-                                                            disabled
-                                                            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#7A0C0C] via-[#8c1010] to-[#7A0C0C] text-amber-200 text-xs sm:text-sm font-bold opacity-60 cursor-not-allowed border border-amber-500/40 shadow-xs"
-                                                            title="पेमेंट गेटवे लवकरच उपलब्ध होईल (Pay Now coming soon)"
-                                                        >
-                                                            <span>💳 Pay Now</span>
-                                                        </button>
-
-                                                        {/* Inline Cash Payment Confirmation */}
-                                                        {formData.paymentMethod === "रोख" && (
-                                                            <div className="flex items-center gap-2 sm:pl-3 sm:border-l-2 border-amber-400 text-xs print:hidden">
-                                                                <span className="font-extrabold text-amber-950 whitespace-nowrap">
-                                                                    रक्कम भरली? :
-                                                                </span>
-                                                                <div className="flex items-center gap-2">
-                                                                    <label className={`flex items-center gap-1 cursor-pointer font-bold text-xs px-2.5 py-1 rounded-lg border transition-all ${cashPaidStatus === "yes" ? "bg-emerald-600 text-white border-emerald-700 shadow-xs" : "bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100"}`}>
-                                                                        <input
-                                                                            type="radio"
-                                                                            name="cashPaidStatus"
-                                                                            value="yes"
-                                                                            checked={cashPaidStatus === "yes"}
-                                                                            onChange={() => setCashPaidStatus("yes")}
-                                                                            className="w-3.5 h-3.5 accent-emerald-700 cursor-pointer"
-                                                                        />
-                                                                        <span>होय (Yes)</span>
-                                                                    </label>
-                                                                    <label className={`flex items-center gap-1 cursor-pointer font-bold text-xs px-2.5 py-1 rounded-lg border transition-all ${cashPaidStatus === "no" ? "bg-red-600 text-white border-red-700 shadow-xs" : "bg-red-50 text-red-900 border-red-300 hover:bg-red-100"}`}>
-                                                                        <input
-                                                                            type="radio"
-                                                                            name="cashPaidStatus"
-                                                                            value="no"
-                                                                            checked={cashPaidStatus === "no"}
-                                                                            onChange={() => setCashPaidStatus("no")}
-                                                                            className="w-3.5 h-3.5 accent-red-700 cursor-pointer"
-                                                                        />
-                                                                        <span>नाही (No)</span>
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Payment Verification Badge */}
-                                                {isPaymentVerified && (
-                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 sm:py-1 rounded-full bg-emerald-100 border border-emerald-400 text-emerald-950 text-xs font-extrabold shadow-xs">
-                                                        <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[10px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
-                                                        <span>रक्कम रु. {formData.registrationFee} प्राप्त झाली (Payment Received)</span>
-                                                    </div>
-                                                )}
+                                        {/* Payment Method Section (देयक पद्धत) */}
+                                        <div className="p-3 sm:p-4 rounded-xl bg-amber-50/60 border border-amber-300/60 flex flex-wrap items-center justify-between gap-3">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <label className="text-stone-900 font-extrabold text-xs sm:text-sm whitespace-nowrap">
+                                                    देयक पद्धत :
+                                                </label>
+                                                <button
+                                                    type="submit"
+                                                    disabled={submitting}
+                                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#4A0404] via-[#7A0C0C] to-[#4A0404] hover:brightness-110 active:scale-95 text-amber-200 font-extrabold text-xs sm:text-sm shadow-md border border-amber-500/50 cursor-pointer transition-all disabled:opacity-50"
+                                                >
+                                                    {submitting ? (
+                                                        <span>⏳ प्रक्रिया सुरू आहे...</span>
+                                                    ) : (
+                                                        <>
+                                                            <span>💳 Pay & Submit (PhonePe Online)</span>
+                                                            <span className="text-amber-400">➔</span>
+                                                        </>
+                                                    )}
+                                                </button>
                                             </div>
-
-                                            {/* UPI QR & Upload Section - Skipped / Commented Out */}
-                                            {/*
-                                            {formData.paymentMethod === "UPI" && (
-                                                <div className="mt-3 p-4 rounded-2xl bg-amber-50/90 border-2 border-amber-500/60 shadow-lg max-w-sm mx-auto text-center space-y-3 print:hidden">
-                                                    <p className="text-xs font-bold text-amber-950 flex items-center justify-center gap-1.5">
-                                                        <span>📲</span>
-                                                        <span>PhonePe / UPI द्वारे QR कोड स्कॅन करून ऑनलाईन पेमेंट करा</span>
-                                                    </p>
-                                                    <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto bg-white p-2 rounded-2xl border-2 border-amber-300 shadow-md flex items-center justify-center">
-                                                        <img
-                                                            src="/QR.jpeg"
-                                                            alt="PhonePe Payment QR Code"
-                                                            className="w-full h-full object-contain p-0.5 rounded-xl"
-                                                        />
-                                                    </div>
-                                                    <div className="pt-1 border-t border-amber-200">
-                                                        <p className="text-xs font-bold text-stone-800">
-                                                            एकूण भरणा शुल्क: <span className="font-extrabold text-[#7A0C0C] text-sm">₹{formData.registrationFee}</span>
-                                                        </p>
-                                                        <p className="text-[10px] font-semibold text-stone-600 mt-0.5">
-                                                            (Rajas Balkrushna Gulwade)
-                                                        </p>
-                                                        <p className="text-xs font-bold text-[#7A0C0C] mt-1">
-                                                            📞 UPI & चौकशी मोबाईल: <a href="tel:9595707707" className="underline font-mono">9595707707</a>
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="pt-2 border-t border-amber-300/80 space-y-1.5 text-left">
-                                                        <label className="block text-xs font-extrabold text-stone-900">
-                                                            पेमेंट स्क्रीनशॉट अपलोड करा : <span className="text-red-600">*</span>
-                                                        </label>
-
-                                                        <div className="flex flex-col gap-2">
-                                                            <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 bg-white p-1.5 rounded-xl border-2 border-amber-400 shadow-xs">
-                                                                <label
-                                                                    htmlFor="screenshot-upload"
-                                                                    className="min-h-[40px] bg-[#7A0C0C] hover:bg-[#5c0808] active:bg-[#5c0808] text-amber-200 text-xs font-bold px-3 py-2 rounded-lg cursor-pointer transition-all whitespace-nowrap flex items-center gap-1 shadow-xs"
-                                                                >
-                                                                    <span>📂</span>
-                                                                    <span>Choose File (फाईल निवडा)</span>
-                                                                </label>
-                                                                <span className="text-[11px] font-semibold text-stone-700 truncate flex-1">
-                                                                    {paymentScreenshot ? paymentScreenshot.name : "कोणतीही फाईल निवडली नाही (No file chosen)"}
-                                                                </span>
-                                                            </div>
-
-                                                            <input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                id="screenshot-upload"
-                                                                onChange={handleScreenshotChange}
-                                                                className="hidden"
-                                                            />
-
-                                                            {screenshotPreview && (
-                                                                <div className="relative w-full p-2 bg-emerald-50 rounded-xl border border-emerald-400 shadow-xs flex items-center gap-3 mt-1">
-                                                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-emerald-300 flex-shrink-0">
-                                                                        <img
-                                                                            src={screenshotPreview}
-                                                                            alt="Payment Screenshot Preview"
-                                                                            className="w-full h-full object-cover"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-800">
-                                                                            <span className="w-3.5 h-3.5 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center font-bold flex-shrink-0">✓</span>
-                                                                            <span>स्क्रीनशॉट जोडला गेला</span>
-                                                                        </div>
-                                                                        <p className="text-[11px] text-stone-600 truncate mt-0.5 font-medium">
-                                                                            {paymentScreenshot?.name}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            */}
-
-                                            {screenshotError && (
-                                                <div className="p-2.5 rounded-xl bg-red-100 border border-red-400 text-red-900 font-bold text-center text-xs print:hidden">
-                                                    {screenshotError}
-                                                </div>
-                                            )}
+                                            <div className="text-right">
+                                                <span className="text-xs text-stone-600 font-semibold">एकूण देय रक्कम: </span>
+                                                <span className="font-mono font-black text-sm sm:text-base text-[#7A0C0C]">₹{formData.registrationFee}</span>
+                                            </div>
                                         </div>
 
-                                        {/* Sandesh Box */}
-                                        {isPaymentVerified && (
-                                            <div className="mt-4 p-3 rounded-xl bg-amber-50/90 border-2 border-amber-600/40 text-stone-900 shadow-xs print:p-2">
-                                                <p className="text-xs sm:text-sm leading-relaxed font-semibold flex items-start gap-2">
-                                                    <span className="font-extrabold text-red-700 whitespace-nowrap">
-                                                        संदेश :
-                                                    </span>
-                                                    <span className="text-stone-900 font-extrabold">
-                                                        {typedMessage}
-                                                        {typedMessage.length < getFullSandeshMessage(membershipType).length && (
-                                                            <span className="inline-block w-1.5 h-3.5 bg-amber-800 ml-1 animate-pulse print:hidden" />
-                                                        )}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* Footer Notice */}
-                                        <div className="hidden print:block text-center pt-2 border-t border-amber-200 mt-2">
-                                            <p className="text-[11px] font-extrabold text-[#7A0C0C]">
-                                                ही पावती सदस्य नोंदणीचा अधिकृत पुरावा म्हणून जतन करावी.
-                                            </p>
-                                        </div>
+                                        <p className="text-center text-[11px] font-semibold text-stone-500 pt-1 print:hidden">
+                                            🔒 देयक पुष्टीनंतर लगेचच अधिकृत पावती व सदस्य क्रमांक जारी केला जाईल.
+                                        </p>
 
                                         {/* Feedback alerts */}
                                         {submitSuccessMsg && (
-                                            <div className="p-3.5 rounded-xl bg-emerald-100 border-2 border-emerald-500 text-emerald-950 font-bold text-center text-xs sm:text-sm print:hidden shadow-sm">
+                                            <div className="p-3.5 rounded-xl bg-purple-100 border-2 border-purple-500 text-purple-950 font-bold text-center text-xs sm:text-sm print:hidden shadow-sm">
                                                 {submitSuccessMsg}
                                             </div>
                                         )}
@@ -1509,27 +1170,6 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                 {submitErrorMsg}
                                             </div>
                                         )}
-
-                                        {/* Submit & Print Button */}
-                                        <div className="flex items-center justify-center pt-2 print:hidden">
-                                            <button
-                                                type="submit"
-                                                disabled={submitting || (formData.paymentMethod === "UPI" && !paymentScreenshot)}
-                                                className={`min-h-[50px] w-full sm:w-auto px-8 py-3.5 rounded-full font-extrabold text-white shadow-xl transition-all transform active:scale-[0.98] sm:hover:-translate-y-0.5 text-base sm:text-lg flex items-center justify-center gap-2 ${submitting || (formData.paymentMethod === "UPI" && !paymentScreenshot)
-                                                    ? "bg-stone-400 cursor-not-allowed opacity-80"
-                                                    : "bg-gradient-to-r from-[#4A0404] via-[#7A0C0C] to-[#4A0404] hover:brightness-110 hover:shadow-red-900/40 border border-amber-500/40"
-                                                    }`}
-                                            >
-                                                {submitting ? (
-                                                    <span>⏳ जतन होत आहे...</span>
-                                                ) : (
-                                                    <>
-                                                        <span>अर्ज सबमिट करा व पावती प्रिंट काढा</span>
-                                                        <span>🖨️</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -1537,6 +1177,90 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                     </table>
                 </form>
             </div>
+
+            {/* Duplicate Mobile Modal Popup */}
+            {duplicateModal && duplicateModal.open && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+                    <div className="bg-[#FFFDF9] border-2 border-red-600 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden text-center space-y-4 p-6 sm:p-7 relative border-t-8 border-t-red-700">
+                        {/* Close 'X' Button */}
+                        <button
+                            type="button"
+                            onClick={() => setDuplicateModal(null)}
+                            className="absolute top-3 right-3 text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition-all cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        {/* Alert Badge Icon */}
+                        <div className="w-16 h-16 mx-auto rounded-full bg-red-100 border-2 border-red-400 text-red-700 flex items-center justify-center text-3xl shadow-xs">
+                            <AlertTriangle className="w-8 h-8 text-red-600 animate-pulse" />
+                        </div>
+
+                        {/* Title */}
+                        <div>
+                            <h3 className="text-lg sm:text-xl font-black text-red-900">
+                                मोबाईल क्रमांक आधीच नोंदणीकृत आहे!
+                            </h3>
+                            <p className="text-xs text-stone-600 mt-1 font-semibold">
+                                एका मोबाईल क्रमांकावर फक्त १ मुख्य सदस्याची नोंदणी करता येते.
+                            </p>
+                        </div>
+
+                        {/* Duplicate Details Box */}
+                        <div className="p-4 bg-amber-50/90 rounded-xl border border-amber-300 text-xs sm:text-sm text-stone-800 space-y-2 text-left">
+                            <div className="flex items-center justify-between">
+                                <span className="text-stone-600 font-bold">नोंदवलेला मोबाईल:</span>
+                                <span className="font-mono font-black text-red-900 text-sm">{duplicateModal.mobileNo}</span>
+                            </div>
+                            {duplicateModal.memberNo && (
+                                <div className="flex items-center justify-between border-t border-amber-200/80 pt-1.5">
+                                    <span className="text-stone-600 font-bold">विद्यमान सदस्य क्र:</span>
+                                    <span className="font-mono font-bold text-emerald-900 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{duplicateModal.memberNo}</span>
+                                </div>
+                            )}
+                            {duplicateModal.fullName && (
+                                <div className="flex items-center justify-between border-t border-amber-200/80 pt-1.5">
+                                    <span className="text-stone-600 font-bold">सदस्याचे नाव:</span>
+                                    <span className="font-bold text-stone-900">{duplicateModal.fullName}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <p className="text-xs text-stone-700 font-medium bg-red-50 p-2.5 rounded-lg border border-red-200">
+                            💡 कृपया पुढे जाण्यासाठी <strong>दुसरा वैध १० अंकी मोबाईल क्रमांक</strong> प्रविष्ट करा.
+                        </p>
+
+                        {/* Action Buttons */}
+                        <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const targetIdx = duplicateModal.memberIndex ?? 0;
+                                    setDuplicateModal(null);
+                                    setTimeout(() => {
+                                        const mobileInput = document.getElementById(`main-member-mobile-${targetIdx}`) as HTMLInputElement;
+                                        if (mobileInput) {
+                                            mobileInput.focus();
+                                            mobileInput.select();
+                                        }
+                                    }, 100);
+                                }}
+                                className="flex-1 py-3 px-4 bg-gradient-to-r from-red-700 via-red-800 to-red-900 text-white font-black rounded-xl shadow-md hover:brightness-110 active:scale-98 transition-all text-sm cursor-pointer flex items-center justify-center gap-2"
+                            >
+                                <Phone className="w-4 h-4 text-red-200" />
+                                <span>मोबाईल क्रमांक बदला</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setDuplicateModal(null)}
+                                className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                            >
+                                बंद करा
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -9,6 +9,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
+import { getApiUrl } from "@/utils/config";
 
 type FormState = {
   name: string;
@@ -36,14 +37,6 @@ export default function CareerPage() {
     resume: null,
   });
 
-  const getApiUrl = (): string => {
-    if (typeof window !== "undefined") {
-      const host = window.location.hostname;
-      if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
-      if (host.includes("mptm.org")) return "https://api.mptm.org";
-    }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
-  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

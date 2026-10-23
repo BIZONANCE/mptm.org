@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { getDistrictOptions, getCityOptions } from "@/utils/locationData";
+import { getApiUrl } from "@/utils/config";
 
 interface ContactInfoData {
   address: string;
@@ -34,17 +35,6 @@ export default function ContactUs() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const getApiUrl = (): string => {
-    let url = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
-    if (url) return url.replace(/\/api\/v1\/?$/, "").replace(/\/+$/, "");
-    if (typeof window !== "undefined") {
-      const host = window.location.hostname;
-      if (host.includes("mptmamravati.org")) return "https://api.mptmamravati.org";
-      if (host.includes("mptm.org")) return "https://api.mptm.org";
-    }
-    return "https://api.mptmamravati.org";
-  };
 
   const API_URL = getApiUrl();
 

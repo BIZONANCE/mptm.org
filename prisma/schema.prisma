@@ -101,3 +101,71 @@ model ExecutiveMember {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model CareerApplication {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String
+  position   String
+  message    String?
+  city       String?
+  district   String?
+  resumeName String?
+  resumeData String?  @db.Text
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  subject   String?
+  message   String
+  status    String   @default("UNREAD")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactInfo {
+  id             String   @id @default("default")
+  address        String
+  phone          String
+  alternatePhone String?
+  email          String
+  hours          String?
+  updatedAt      DateTime @updatedAt
+}
+
+model Advertisement {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  imageUrl    String?  @db.Text
+  videoUrl    String?  @db.Text
+  mediaType   String?  @default("image")
+  adLink      String?
+  socialLinks String?  @db.Text
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ManagedUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  phone     String
+  city      String?
+  date      String?
+  time      String?
+  status    String   @default("VERIFIED")
+  role      String   @default("User")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+

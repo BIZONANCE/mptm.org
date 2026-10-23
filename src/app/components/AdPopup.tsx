@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, Globe, ChevronLeft, ChevronRight, Phone, MapPin } from "lucide-react";
+import { getApiUrl } from "@/utils/config";
 
 export interface SocialLinks {
   phone?: string;
@@ -79,15 +80,6 @@ export default function AdPopup() {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const getApiUrl = () => {
-    if (typeof window !== "undefined") {
-      const hostname = window.location.hostname;
-      if (hostname.includes("mptmamravati.org")) {
-        return "https://api.mptmamravati.org";
-      }
-    }
-    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5015";
-  };
 
   useEffect(() => {
     const fetchActiveAds = async () => {
