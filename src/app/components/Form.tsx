@@ -1142,7 +1142,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         <span>⏳ प्रक्रिया सुरू आहे...</span>
                                                     ) : (
                                                         <>
-                                                            <span>💳 Pay & Submit (PhonePe Online)</span>
+                                                            <span>💳 Pay & Submit</span>
                                                             <span className="text-amber-400">➔</span>
                                                         </>
                                                     )}
