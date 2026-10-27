@@ -5,6 +5,17 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl } from "@/utils/config";
 import { downloadReceiptAsPdf } from "@/utils/pdfUtils";
+import {
+  CheckCircle2,
+  ShieldCheck,
+  AlertTriangle,
+  Download,
+  Home,
+  Eye,
+  X,
+  QrCode,
+  FileText
+} from "lucide-react";
 
 interface MainMember {
   srNo: number;
@@ -102,6 +113,20 @@ export default function ReceiptPage() {
   const [receiptType, setReceiptType] = useState<"REGISTRATION" | "DONATION">("REGISTRATION");
   const [data, setData] = useState<ReceiptData | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isScanPopupOpen, setIsScanPopupOpen] = useState(false);
+  const [shouldAutoDownload, setShouldAutoDownload] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      if (sp.get("scan") === "1" || sp.get("verified") === "1" || sp.get("verify") === "1") {
+        setIsScanPopupOpen(true);
+      }
+      if (sp.get("download") === "1") {
+        setShouldAutoDownload(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!publicToken) {
@@ -132,6 +157,16 @@ export default function ReceiptPage() {
 
     fetchReceipt();
   }, [publicToken]);
+
+  // Handle auto-download when requested via URL (?download=1)
+  useEffect(() => {
+    if (data && shouldAutoDownload) {
+      setShouldAutoDownload(false);
+      setTimeout(() => {
+        handleDownloadPdf();
+      }, 700);
+    }
+  }, [data, shouldAutoDownload]);
 
   // Dynamically set page title to receipt number so browser's native print/Save as PDF uses the receipt ID
   useEffect(() => {
@@ -190,31 +225,77 @@ export default function ReceiptPage() {
     );
   }
 
+  // ❖ FAKE / INVALID RECEIPT POPUP (When receipt is fake, altered or not found in database) ❖
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-6 rounded-2xl border border-red-200 shadow-lg text-center space-y-4">
-          <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl mx-auto font-bold">
-            ⚠️
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full bg-white rounded-3xl border-2 border-red-500 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-r from-[#5B0505] via-[#851010] to-[#5B0505] text-white p-4 text-center border-b-2 border-red-400">
+            <p className="text-[11px] font-bold text-amber-300">❖ महाराष्ट्र प्रांतिक तैलिक महासभा ❖</p>
+            <h3 className="text-base font-black text-amber-100 leading-tight">
+              डिजिटल पावती सत्यता पडताळणी
+            </h3>
           </div>
-          <h2 className="text-lg font-bold text-stone-900">पावती आढळली नाही</h2>
-          <p className="text-sm text-stone-600">{error || "पावती माहिती उपलब्ध नाही."}</p>
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="w-full py-2.5 px-4 bg-[#7A0C0C] hover:bg-[#5e0909] text-white font-bold rounded-xl text-sm transition-all"
-          >
-            मुख्य पृष्ठावर जा
-          </button>
+
+          <div className="p-6 sm:p-7 text-center space-y-4">
+            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto shadow-inner border-2 border-red-300">
+              <AlertTriangle className="w-9 h-9 text-red-600 animate-pulse" />
+            </div>
+
+            <div className="space-y-1">
+              <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-red-800 bg-red-100 px-3 py-0.5 rounded-full border border-red-300">
+                ✕ अनधिकृत / बनावट पावती • Fake Receipt
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-red-950">
+                पावती बनावट / अमान्य आहे!
+              </h2>
+              <p className="text-xs font-bold text-red-700">
+                (Receipt is Fake or Not Found in Database)
+              </p>
+            </div>
+
+            <div className="p-4 bg-red-50 rounded-2xl border border-red-200 text-left space-y-2 text-xs text-red-900 leading-relaxed">
+              <p className="font-semibold">
+                ⚠️ ही पावती महाराष्ट्र प्रांतिक तैलिक महासभा (अमरावती विभाग) च्या अधिकृत डेटाबेसमध्ये आढळली नाही.
+              </p>
+              <p className="text-[11.5px] text-red-800">
+                सदर पावती बनावट (Fake), फेरफार केलेली किंवा जुनी असू शकते. अधिकृत डिजिटल सिस्टीमशिवाय जारी केलेली कोणतीही पावती वैध मानली जाणार नाही.
+              </p>
+              {publicToken && (
+                <p className="font-mono text-[11px] text-stone-600 pt-1.5 border-t border-red-200">
+                  स्कॅन केलेला संदर्भ: <strong className="text-red-950 font-bold">{publicToken}</strong>
+                </p>
+              )}
+            </div>
+
+            {/* User Requested Options: Mukhya Prushth */}
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="w-full py-3 px-4 bg-gradient-to-r from-[#7A0C0C] to-[#991B1B] hover:brightness-110 text-white font-extrabold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+              >
+                <Home className="w-4 h-4" />
+                <span>मुख्य पृष्ठ (Mukhya Prushth)</span>
+              </button>
+              <Link
+                href="/contact"
+                className="w-full py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold rounded-xl border border-stone-300 transition-all text-xs text-center inline-block"
+              >
+                तक्रार नोंदवा / महासभेशी संपर्क करा
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   const feeAmount = data.registrationFee || data.amount || data.fee || 0;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(
-    data.verifyUrl || typeof window !== "undefined" ? window.location.href : ""
-  )}`;
+  const siteUrl = typeof window !== "undefined" && window.location.origin ? window.location.origin : "https://mptmamravati.org";
+  const qrTargetUrl = `${siteUrl}/receipt/${encodeURIComponent(publicToken)}?scan=1`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrTargetUrl)}`;
 
 
   return (
@@ -544,14 +625,18 @@ export default function ReceiptPage() {
           <div className="pt-3 border-t-2 border-amber-300/80 grid grid-cols-1 sm:grid-cols-3 items-center gap-3">
             {/* Left: QR Code Verification */}
             <div className="flex items-center gap-2.5">
-              <div className="p-1 bg-white border border-amber-400 rounded-xl shadow-2xs shrink-0 text-center">
+              <div
+                onClick={() => setIsScanPopupOpen(true)}
+                className="p-1 bg-white border border-amber-400 hover:border-emerald-500 rounded-xl shadow-2xs shrink-0 text-center cursor-pointer transition-all hover:scale-105 group"
+                title="सत्यता पडताळणी पॉपअप पहा (Click to Verify)"
+              >
                 <img
                   src={qrUrl}
                   alt="Receipt Verification QR"
                   className="w-18 h-18 sm:w-20 sm:h-20 object-contain mx-auto"
                 />
-                <span className="text-[8px] font-bold text-stone-600 block leading-tight mt-0.5">
-                  स्कॅन व पडताळा
+                <span className="text-[8px] font-bold text-emerald-800 group-hover:text-emerald-950 block leading-tight mt-0.5">
+                  स्कॅन व पडताळा ✓
                 </span>
               </div>
               <div className="space-y-0.5 text-stone-700 text-left">
@@ -585,6 +670,129 @@ export default function ReceiptPage() {
           </div>
         </div>
       </div>
+
+      {/* ❖ VERIFIED PAVATI POPUP MODAL (Appears on QR Code Scan or Click) ❖ */}
+      {isScanPopupOpen && data && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200 font-sans print:hidden">
+          <div className="bg-[#FFFDF9] rounded-3xl border-2 border-emerald-500 shadow-2xl max-w-lg w-full overflow-hidden text-stone-900 animate-in zoom-in-95 duration-200 relative">
+            {/* Top Close Button */}
+            <button
+              type="button"
+              onClick={() => setIsScanPopupOpen(false)}
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-stone-700 flex items-center justify-center shadow-xs cursor-pointer border border-stone-200"
+              title="बंद करा (Close)"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Header Banner */}
+            <div className="bg-gradient-to-r from-[#3A0202] via-[#7A0C0C] to-[#3A0202] text-white p-4 text-center border-b-2 border-amber-400">
+              <p className="text-[11px] font-bold text-amber-300">❖ जय संताजी ❖</p>
+              <h3 className="text-base sm:text-lg font-black text-amber-100 leading-tight">
+                महाराष्ट्र प्रांतिक तैलिक महासभा
+              </h3>
+              <p className="text-[11px] text-amber-200/90 font-medium">
+                अमरावती विभाग, अमरावती • अधिकृत डिजिटल पडताळणी
+              </p>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4">
+              {/* Success Badge */}
+              <div className="text-center space-y-1.5">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto shadow-inner border-2 border-emerald-400">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600 animate-pulse" />
+                </div>
+                <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-0.5 rounded-full border border-emerald-300">
+                  ✓ 100% Genuine & Verified
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-emerald-950">
+                  प्रमाणित अधिकृत पावती
+                </h2>
+                <p className="text-xs text-stone-600 font-medium">
+                  ही पावती महासभेच्या अधिकृत डेटाबेसमध्ये नोंदणीकृत आणि वैध आहे.
+                </p>
+              </div>
+
+              {/* Receipt Summary Details */}
+              <div className="bg-white rounded-2xl border border-emerald-200 shadow-2xs p-3.5 sm:p-4 space-y-2 text-xs sm:text-sm">
+                <div className="flex justify-between border-b border-stone-100 pb-1.5">
+                  <span className="text-stone-500 font-medium">पावती क्रमांक :</span>
+                  <span className="font-mono font-black text-[#7A0C0C] text-sm sm:text-base">
+                    {data.receiptNo}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 pb-1.5">
+                  <span className="text-stone-500 font-medium">सदस्य / देणगीदार :</span>
+                  <span className="font-bold text-stone-900 text-right">
+                    {data.mainMembers?.[0]?.fullName || data.name || "सदस्य"}
+                  </span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 pb-1.5">
+                  <span className="text-stone-500 font-medium">पावती दिनांक :</span>
+                  <span className="font-mono font-semibold text-stone-800">{data.date}</span>
+                </div>
+                <div className="flex justify-between border-b border-stone-100 pb-1.5">
+                  <span className="text-stone-500 font-medium">नोंदणी प्रकार :</span>
+                  <span className="font-bold text-amber-900">
+                    {receiptType === "DONATION"
+                      ? "देणगी (Donation)"
+                      : data.membershipType === "EXECUTIVE"
+                      ? "कार्यकारिणी सदस्य नोंदणी"
+                      : "प्राथमिक सदस्य नोंदणी"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-baseline pt-1">
+                  <span className="text-stone-700 font-bold">भरणा रक्कम :</span>
+                  <span className="font-mono font-black text-lg text-emerald-700">
+                    ₹{feeAmount}/-
+                  </span>
+                </div>
+              </div>
+
+              {/* User Requested Options: Download Your Pavati & Mukhya Prushth */}
+              <div className="space-y-2 pt-1">
+                {/* Option 1: Download Your Pavati */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsScanPopupOpen(false);
+                    await handleDownloadPdf();
+                  }}
+                  disabled={isDownloading}
+                  className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 via-emerald-700 to-emerald-800 hover:brightness-110 text-white font-extrabold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>
+                    {isDownloading ? "पावती डाउनलोड होत आहे..." : "तुमची पावती डाउनलोड करा (Download Pavati)"}
+                  </span>
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {/* Option 2: Mukhya Prushth */}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/")}
+                    className="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                  >
+                    <Home className="w-3.5 h-3.5 text-amber-800" />
+                    <span>मुख्य पृष्ठ (Home)</span>
+                  </button>
+
+                  {/* Option 3: View Full Pavati */}
+                  <button
+                    type="button"
+                    onClick={() => setIsScanPopupOpen(false)}
+                    className="w-full py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-xl border border-stone-300 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-stone-700" />
+                    <span>पावती पहा (View)</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

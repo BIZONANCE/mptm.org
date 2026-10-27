@@ -680,7 +680,7 @@ mptmamravati.org`;
                   {(() => {
                     const siteUrl = (typeof getSiteUrl === "function" ? getSiteUrl() : "") || "https://mptm.org";
                     const recNo = selectedViewExec.receiptNo || `MPTM-EM-${selectedViewExec.id.replace(/\D/g, "").slice(-4) || "101"}`;
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(`${siteUrl}/receipt/${recNo}`)}`;
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(`${siteUrl}/receipt/${recNo}?scan=1`)}`;
                     return (
                       <>
                         <div className="p-1 bg-white border border-amber-400 rounded-xl shadow-2xs shrink-0 text-center">
