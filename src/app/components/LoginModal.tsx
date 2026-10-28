@@ -185,7 +185,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         localStorage.setItem("mptm_admin_role", targetRole);
       }
 
-      const redirectPath = targetRole === "SUPER_ADMIN" ? "/" : "/registrations";
+      const redirectPath = targetRole === "SUPER_ADMIN" ? "/" : "/memberregistration";
       const targetUrl = `${ADMIN_URL}${redirectPath}?role=${targetRole}&username=${encodeURIComponent(emailTrimmed)}`;
       window.open(targetUrl, "_blank");
       onClose();

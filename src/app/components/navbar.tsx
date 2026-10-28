@@ -84,7 +84,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2 ml-2">
               {/* Golden CTA button - Registration */}
               <Link
-                href="/registration"
+                href="/memberregistration"
                 className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full border border-amber-300 shadow-sm hover:shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0"
               >
                 सदस्य नोंदणी
@@ -143,7 +143,7 @@ export default function Navbar() {
             {/* Action buttons - Mobile */}
             <div className="flex items-center gap-2 my-3">
               <Link
-                href="/registration"
+                href="/memberregistration"
                 onClick={() => setIsOpen(false)}
                 className="flex-1 text-center bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-bold text-xs sm:text-sm px-3 py-2.5 rounded-full border border-amber-300 shadow-sm hover:from-amber-500 hover:to-amber-600 transition-all whitespace-nowrap"
               >

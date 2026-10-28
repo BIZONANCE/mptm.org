@@ -62,7 +62,7 @@ export default function AboutPage() {
           {/* Registration CTA Button */}
           <div>
             <Link
-              href="/registration"
+              href="/memberregistration"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white font-extrabold text-base sm:text-lg px-6 py-3.5 rounded-full border-2 border-amber-400 shadow-lg hover:shadow-amber-500/25 hover:scale-105 active:scale-95 transition-all duration-300"
             >
               <span>🚩 ऑनलाईन सदस्य नोंदणी करा</span>
