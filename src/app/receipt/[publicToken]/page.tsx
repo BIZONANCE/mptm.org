@@ -251,7 +251,7 @@ export default function ReceiptPage() {
 
             <div className="space-y-1">
               <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-red-800 bg-red-100 px-3 py-0.5 rounded-full border border-red-300">
-                ✕ अनधिकृत / बनावट पावती • Fake Receipt
+                ✕ अनधिकृत / बनावट पावती
               </span>
               <h2 className="text-xl sm:text-2xl font-black text-red-950">
                 पावती बनावट / अमान्य आहे!
@@ -283,7 +283,7 @@ export default function ReceiptPage() {
                 className="w-full py-3 px-4 bg-gradient-to-r from-[#7A0C0C] to-[#991B1B] hover:brightness-110 text-white font-extrabold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
               >
                 <Home className="w-4 h-4" />
-                <span>मुख्य पृष्ठ (Mukhya Prushth)</span>
+                <span>मुख्य पृष्ठ</span>
               </button>
               <Link
                 href="/contact"
@@ -702,7 +702,7 @@ export default function ReceiptPage() {
               type="button"
               onClick={() => setIsScanPopupOpen(false)}
               className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-stone-700 flex items-center justify-center shadow-xs cursor-pointer border border-stone-200"
-              title="बंद करा (Close)"
+              title="बंद करा"
             >
               <X className="w-4 h-4" />
             </button>
@@ -725,14 +725,12 @@ export default function ReceiptPage() {
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 animate-pulse" />
                 </div>
                 <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-0.5 rounded-full border border-emerald-300">
-                  ✓ 100% Genuine & Verified
+                  ✓ अधिकृत नोंद
                 </span>
                 <h2 className="text-xl sm:text-2xl font-black text-emerald-950">
                   प्रमाणित अधिकृत पावती
                 </h2>
-                <p className="text-xs text-stone-600 font-medium">
-                  ही पावती महासभेच्या अधिकृत डेटाबेसमध्ये नोंदणीकृत आणि वैध आहे.
-                </p>
+                
               </div>
 
               {/* Receipt Summary Details */}
@@ -757,7 +755,7 @@ export default function ReceiptPage() {
                   <span className="text-stone-500 font-medium">नोंदणी प्रकार :</span>
                   <span className="font-bold text-amber-900">
                     {receiptType === "DONATION"
-                      ? "देणगी (Donation)"
+                      ? "देणगी"
                       : data.membershipType === "EXECUTIVE"
                       ? "कार्यकारिणी सदस्य नोंदणी"
                       : "प्राथमिक सदस्य नोंदणी"}
@@ -785,7 +783,7 @@ export default function ReceiptPage() {
                 >
                   <Download className="w-4 h-4" />
                   <span>
-                    {isDownloading ? "पावती डाउनलोड होत आहे..." : "तुमची पावती डाउनलोड करा (Download Pavati)"}
+                    {isDownloading ? "पावती डाउनलोड होत आहे..." : "पावती डाउनलोड करा"}
                   </span>
                 </button>
 
@@ -796,7 +794,7 @@ export default function ReceiptPage() {
                   className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-extrabold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-xs cursor-pointer active:scale-95"
                 >
                   <WhatsappIcon className="w-4 h-4 text-white" />
-                  <span>व्हॉट्सॲपवर शेअर करा (Share on WhatsApp)</span>
+                  <span>व्हॉट्सॲपवर शेअर करा</span>
                 </button>
 
                 <div className="grid grid-cols-2 gap-2">
@@ -807,7 +805,7 @@ export default function ReceiptPage() {
                     className="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold rounded-xl border border-amber-300 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                   >
                     <Home className="w-3.5 h-3.5 text-amber-800" />
-                    <span>मुख्य पृष्ठ (Home)</span>
+                    <span>मुख्य पृष्ठ</span>
                   </button>
 
                   {/* Option 3: View Full Pavati */}
@@ -817,7 +815,7 @@ export default function ReceiptPage() {
                     className="w-full py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-xl border border-stone-300 transition-all flex items-center justify-center gap-1.5 text-xs cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5 text-stone-700" />
-                    <span>पावती पहा (View)</span>
+                    <span>पावती पहा</span>
                   </button>
                 </div>
               </div>
