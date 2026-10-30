@@ -409,40 +409,71 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     const validateFullForm = () => {
         setSubmitErrorMsg("");
 
+        for (let i = 0; i < mainMembers.length; i++) {
+            const m = mainMembers[i];
+            if (!m.fullName || m.fullName.trim() === "") {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चे पूर्ण नाव आवश्यक आहे!`);
+                document.getElementById(`main-member-fullname-${i}`)?.focus();
+                return false;
+            }
+            if (!m.mobileNo || !/^\d{10}$/.test(m.mobileNo.trim())) {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा मोबाईल क्रमांक १० अंकी असावा!`);
+                document.getElementById(`main-member-mobile-${i}`)?.focus();
+                return false;
+            }
+            if (!m.prabhagNo || m.prabhagNo.trim() === "") {
+                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा प्रभाग क्रमांक आवश्यक आहे!`);
+                document.getElementById(`main-member-prabhag-${i}`)?.focus();
+                return false;
+            }
+        }
+
         if (!formData.address || formData.address.trim() === "") {
             setSubmitErrorMsg("⚠️ कृपया पत्ता प्रविष्ट करा!");
+            document.getElementById("form-address")?.focus();
             return false;
         }
 
-        if (!formData.city || formData.city.trim() === "") {
-            setSubmitErrorMsg("⚠️ कृपया शहर प्रविष्ट करा!");
+        if (!formData.gaav || formData.gaav.trim() === "") {
+            setSubmitErrorMsg("⚠️ कृपया गावाचे नाव प्रविष्ट करा!");
+            document.getElementById("form-gaav")?.focus();
+            return false;
+        }
+
+        if (!formData.taluka || formData.taluka.trim() === "") {
+            setSubmitErrorMsg("⚠️ कृपया तालुक्याचे नाव प्रविष्ट करा!");
+            document.getElementById("form-taluka")?.focus();
             return false;
         }
 
         if (!formData.district || formData.district.trim() === "") {
             setSubmitErrorMsg("⚠️ कृपया जिल्हा प्रविष्ट करा!");
+            document.getElementById("form-district")?.focus();
             return false;
         }
 
-        if (formData.pincode && formData.pincode.trim() !== "" && !/^\d{6}$/.test(formData.pincode.trim())) {
-            setSubmitErrorMsg("⚠️ पिनकोड ६ अंकी असावा!");
+        if (!formData.state || formData.state.trim() === "") {
+            setSubmitErrorMsg("⚠️ कृपया राज्य प्रविष्ट करा!");
+            document.getElementById("form-state")?.focus();
             return false;
         }
 
-        for (let i = 0; i < mainMembers.length; i++) {
-            const m = mainMembers[i];
-            if (!m.fullName || m.fullName.trim() === "") {
-                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चे पूर्ण नाव आवश्यक आहे!`);
-                return false;
-            }
-            if (!m.mobileNo || !/^\d{10}$/.test(m.mobileNo.trim())) {
-                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा मोबाईल क्रमांक १० अंकी असावा!`);
-                return false;
-            }
-            if (!m.prabhagNo || m.prabhagNo.trim() === "") {
-                setSubmitErrorMsg(`⚠️ मुख्य सदस्य #${i + 1} चा प्रभाग क्रमांक आवश्यक आहे!`);
-                return false;
-            }
+        if (!formData.country || formData.country.trim() === "") {
+            setSubmitErrorMsg("⚠️ कृपया देश प्रविष्ट करा!");
+            document.getElementById("form-country")?.focus();
+            return false;
+        }
+
+        if (!formData.pincode || formData.pincode.trim() === "") {
+            setSubmitErrorMsg("⚠️ कृपया ६ अंकी पिनकोड प्रविष्ट करा!");
+            document.getElementById("form-pincode")?.focus();
+            return false;
+        }
+
+        if (!/^\d{6}$/.test(formData.pincode.trim())) {
+            setSubmitErrorMsg("⚠️ पिनकोड बरोबर ६ अंकी असावा!");
+            document.getElementById("form-pincode")?.focus();
+            return false;
         }
 
         for (let i = 0; i < familyMembers.length; i++) {
@@ -724,6 +755,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                                 </label>
                                                                 <input
                                                                     type="text"
+                                                                    id={`main-member-fullname-${index}`}
                                                                     value={member.fullName}
                                                                     onChange={(e) =>
                                                                         handleMainMemberChange(index, "fullName", e.target.value)
@@ -764,10 +796,12 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                                 </label>
                                                                 <input
                                                                     type="text"
+                                                                    id={`main-member-prabhag-${index}`}
                                                                     value={member.prabhagNo}
                                                                     onChange={(e) =>
                                                                         handleMainMemberChange(index, "prabhagNo", e.target.value)
                                                                     }
+                                                                    required
                                                                     placeholder="प्रभाग किंवा वॉर्ड क्रमांक"
                                                                     className={inputBase}
                                                                 />
@@ -784,6 +818,7 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                         </label>
                                                         <input
                                                             type="text"
+                                                            id="form-address"
                                                             name="address"
                                                             value={formData.address}
                                                             onChange={handleChange}
@@ -800,9 +835,11 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-gaav"
                                                                 name="gaav"
                                                                 value={formData.gaav}
                                                                 onChange={handleChange}
+                                                                required
                                                                 placeholder="गावाचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
@@ -814,9 +851,11 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-taluka"
                                                                 name="taluka"
                                                                 value={formData.taluka}
                                                                 onChange={handleChange}
+                                                                required
                                                                 placeholder="तालुक्याचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
@@ -830,9 +869,11 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-district"
                                                                 name="district"
                                                                 value={formData.district}
                                                                 onChange={handleChange}
+                                                                required
                                                                 placeholder="जिल्ह्याचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
@@ -844,9 +885,11 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-state"
                                                                 name="state"
                                                                 value={formData.state}
                                                                 onChange={handleChange}
+                                                                required
                                                                 placeholder="राज्याचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
@@ -858,9 +901,11 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-country"
                                                                 name="country"
                                                                 value={formData.country}
                                                                 onChange={handleChange}
+                                                                required
                                                                 placeholder="देशाचे नाव प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
@@ -872,11 +917,17 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
                                                             </label>
                                                             <input
                                                                 type="text"
+                                                                id="form-pincode"
                                                                 inputMode="numeric"
                                                                 maxLength={6}
                                                                 name="pincode"
                                                                 value={formData.pincode}
-                                                                onChange={handleChange}
+                                                                onChange={(e) => {
+                                                                    const cleanVal = e.target.value.replace(/\D/g, "").slice(0, 6);
+                                                                    setFormData((prev) => ({ ...prev, pincode: cleanVal }));
+                                                                }}
+                                                                required
+                                                                pattern="[0-9]{6}"
                                                                 placeholder="६ अंकी पिनकोड प्रविष्ट करा"
                                                                 className={inputBase}
                                                             />
