@@ -192,6 +192,13 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
     const [referredBy, setReferredBy] = useState<string>("");
     const [membershipType, setMembershipType] = useState<"PRIMARY" | "EXECUTIVE">(initialMembershipType);
 
+    // "idle" = no ?ref= param (show form)
+    // "checking" = validating ?ref= param against backend
+    // "valid" = ref is a registered user (show form)
+    // "invalid" = ref is NOT a registered user (block form)
+    const [refCheckStatus, setRefCheckStatus] = useState<"idle" | "checking" | "valid" | "invalid">("idle");
+    const [invalidRefValue, setInvalidRefValue] = useState<string>("");
+
     const SERVER_ASSIGNED_PLACEHOLDER = "MPTM-2026-AMT-R*****";
 
     useEffect(() => {
@@ -201,7 +208,26 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
             const typeParam = params.get("type");
 
             if (refParam && refParam.trim()) {
-                setReferredBy(refParam.trim());
+                // Validate the ref param against the backend before accepting it.
+                // If the ref is not a registered managed user, block the form entirely.
+                const rawRef = refParam.trim();
+                setRefCheckStatus("checking");
+                setInvalidRefValue(rawRef);
+                fetch(`${getApiUrl()}/api/validate-ref?ref=${encodeURIComponent(rawRef)}`)
+                    .then((r) => r.json())
+                    .then((data) => {
+                        if (data?.valid) {
+                            setReferredBy(rawRef);
+                            setRefCheckStatus("valid");
+                        } else {
+                            // Invalid / unregistered ref → block form
+                            setRefCheckStatus("invalid");
+                        }
+                    })
+                    .catch(() => {
+                        // On network error, block to be safe
+                        setRefCheckStatus("invalid");
+                    });
             }
 
             if (initialMembershipType === "EXECUTIVE" || typeParam === "EXECUTIVE" || typeParam === "EXECUTIVE_MEMBER") {
@@ -602,6 +628,80 @@ export default function Form({ initialMembershipType = "PRIMARY" }: FormProps = 
         "flex-1 w-full bg-transparent border-b-2 border-stone-800 focus:border-amber-700 outline-none px-2 py-2 sm:py-0.5 text-base sm:text-sm font-semibold text-stone-900 placeholder:text-stone-400/80";
     const inputReadOnly =
         "flex-1 w-full bg-amber-100/40 border-b-2 border-stone-800 outline-none px-2 py-2 sm:py-0.5 text-base sm:text-sm font-extrabold text-stone-900 cursor-not-allowed select-none";
+
+    // ── Referral link guard ───────────────────────────────────────────────────
+    // Show a loading spinner while we verify the ?ref= param
+    if (refCheckStatus === "checking") {
+        return (
+            <div className="w-full max-w-5xl mx-auto my-8 px-4 flex flex-col items-center justify-center min-h-[40vh] text-center gap-4">
+                <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-stone-700 font-semibold text-sm">लिंक तपासत आहे, कृपया थांबा...</p>
+            </div>
+        );
+    }
+
+    // Block the form entirely for an invalid/unregistered ?ref= value
+    if (refCheckStatus === "invalid") {
+        return (
+            <div
+                className="w-full max-w-2xl mx-auto my-8 sm:my-16 px-4"
+                style={{ fontFamily: "'Baloo 2', 'Tiro Devanagari Marathi', 'Noto Sans Devanagari', system-ui, sans-serif" }}
+            >
+                <div className="bg-white border-2 border-red-300 rounded-2xl shadow-xl overflow-hidden">
+                    {/* Red header */}
+                    <div className="bg-gradient-to-r from-red-800 via-red-700 to-red-800 text-white py-5 px-6 text-center">
+                        <div className="text-3xl mb-2">⚠️</div>
+                        <h2 className="text-lg sm:text-xl font-black text-red-100 leading-tight">
+                            अवैध नोंदणी लिंक
+                        </h2>
+                        <p className="text-red-200 text-xs sm:text-sm mt-1 font-medium">
+                            Invalid Registration Link
+                        </p>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-6 sm:p-8 space-y-4 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 border-2 border-red-300 mx-auto">
+                            <span className="text-2xl">🔒</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <p className="text-stone-800 font-bold text-base sm:text-lg">
+                                ही नोंदणी लिंक वैध नाही!
+                            </p>
+                            <p className="text-stone-600 text-sm leading-relaxed">
+                                तुम्ही वापरत असलेला संदर्भ कोड (<span className="font-mono font-bold text-red-700 break-all">{invalidRefValue}</span>) महाराष्ट्र प्रांतिक तैलिक महासभेच्या नोंदणीकृत प्रतिनिधींच्या यादीत नाही.
+                            </p>
+                            <p className="text-stone-500 text-xs sm:text-sm leading-relaxed mt-2">
+                                This registration link is not valid. The referral code is not recognized.<br />
+                                Please use the correct link provided by your MPTM representative.
+                            </p>
+                        </div>
+
+                        <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 text-sm text-stone-700 font-medium">
+                            🚩 <span className="font-bold">वैध लिंकसाठी</span> आपल्या MPTM प्रतिनिधीशी संपर्क साधा.<br />
+                            <span className="text-xs text-stone-500 mt-1 block">For a valid link, please contact your MPTM representative.</span>
+                        </div>
+
+                        <a
+                            href="/"
+                            className="inline-flex items-center gap-2 mt-2 px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm rounded-xl transition shadow"
+                        >
+                            ← मुख्यपृष्ठावर परत जा
+                        </a>
+                    </div>
+
+                    {/* Bottom stripe */}
+                    <div className="h-1.5 w-full flex">
+                        <div className="flex-1 bg-[#FFB800]" />
+                        <div className="flex-1 bg-[#1B66C9]" />
+                        <div className="flex-1 bg-[#E53935]" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
         <div
